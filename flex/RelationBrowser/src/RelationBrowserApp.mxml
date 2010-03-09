@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" 
+				layout="absolute"
+				creationComplete="init()">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import flare.vis.operator.encoder.Encoder;
+			
+			import eu.stefaner.encoders.Encoders;
+			import eu.stefaner.relationbrowser.layout.RelationBrowserEdgeRenderer;
+			import eu.stefaner.relationbrowser.ui.Node;
+			import eu.stefaner.relationbrowser.RelationBrowser;
+			import eu.stefaner.relationbrowser.data.NodeData;
+		
+			import flare.scale.ScaleType;
+			import flare.util.Shapes;
+			import flare.util.palette.ColorPalette;
+			import flare.vis.data.Data;
+			import flare.vis.data.render.ArrowType;
+			import flare.vis.operator.Operator;
+			import flare.vis.operator.encoder.ColorEncoder;
+			import flare.vis.data.Data;
+			import flare.vis.operator.encoder.PropertyEncoder;			
+		
+			import org.osflash.thunderbolt.Logger;
+		
+			import flash.display.Sprite;
+			import flash.events.Event;
+			import flash.external.ExternalInterface;
+			import flash.filters.DropShadowFilter;
+			import flash.geom.Rectangle;
+			
+			public var dataURL : String;
+			public var configURL : String;
+			protected var relationBrowser : RelationBrowser;
+			private var alreadyLoaded:Dictionary = new Dictionary();
+			private var targetNodeId : String;
+	
+	
+			private function init():void
+			{
+				initExternalInterface();				
+				startUp();
+			}
+			
+			protected function initExternalInterface() : void 
+			{
+				if(ExternalInterface.available) 
+				{
+					try 
+					{
+						ExternalInterface.addCallback("selectNodeByID", selectNodeByID);
+					} 
+					catch(e : Error) 
+					{
+					}
+				}
+			}
+	
+			public function selectNodeByID(id : String = null) : void 
+			{
+				try 
+				{
+					relationBrowser.selectNodeByID(id);
+				} catch(e : Error) {
+					Logger.error("Could not select node by id", id);
+				}
+			}
+	
+			protected function startUp() : void 
+			{
+				Logger.info("startUp");
+				initDisplay();
+				loadData();
+			}
+	
+			protected function loadData() : void 
+			{
+				Logger.info("loadData");
+/*				
+				var i : uint;
+				var j : uint;
+				var numNodes : uint = 100;
+				
+				for( i = 0 ;i < numNodes;i++) {
+					relationBrowser.addNode(new NodeData("id" + i, {name:"node" + i}));				
+				}			
+	 
+				for(i = 0;i < numNodes;i++) {
+					for(j = i + 1;j < numNodes;j++) {
+						if((Math.random() > .95) || j == i + 1) {
+							relationBrowser.addEdge("id" + i, "id" + j);
+						}
+					}
+				}
+				
+				relationBrowser.selectFirstNode();
+*/
+
+				loadDetailsForNode(null);								
+			}
+	
+			protected function loadCSV(nodesFileURL : String, relationsFileURL : String) : void 
+			{
+				Logger.info("loadCSV");
+			}
+	
+			protected function loadGraphML(graphmlFileURL : String) : void 
+			{
+				Logger.info("loadGraphML");
+			}
+	
+			protected function initDisplay() : void 
+			{
+				Logger.info("RelationBrowserApp: initDisplay");
+				
+				relationBrowser = new RelationBrowser(); 
+
+				relationBrowser.bounds = new Rectangle(0, 0, this.width /*stage.stageWidth*/, this.height /*stage.stageHeight*/);
+				relationBrowser.x = this.width /*stage.stageWidth*/ * .5;
+				relationBrowser.y = this.height /*stage.stageHeight*/ * .5;
+				
+				relationBrowser.addOperators(getOperators());
+				relationBrowser.nodeDefaults = getNodeDefaults();
+				relationBrowser.edgeDefaults = getEdgeDefaults();
+				relationBrowser.sortBy = ["props.cluster"];
+				
+				RelationBrowseSpriteHolder.addChild(relationBrowser);
+				relationBrowser.addEventListener(RelationBrowser.NODE_CLICKED, onNodeClicked);
+				relationBrowser.addEventListener(RelationBrowser.NODE_SELECTED, onNodeSelected);
+				relationBrowser.addEventListener(RelationBrowser.NODE_SELECTION_FINISHED, onNodeSelectionFinished);
+						
+			}
+	
+			protected function getNodeDefaults() : Object 
+			{
+				var n : Object = {};
+				n.lineWidth = 2;
+				n.lineColor = 0xAA666666;
+				n.fillColor = 0xDD333333;
+				n.shape = Shapes.CIRCLE;
+				n.w = n.h = 80;
+				n.size = 8;
+				n.edgeRadius = 55;
+				n.visible = false;
+				// n.blendMode = BlendMode.MULTIPLY;
+				n.filters = [new DropShadowFilter(4, 45, 0, .33, 6, 6, 1, 2)];
+				//n["title_tf.filters"] = [new DropShadowFilter(4, 45, 0, .1, 6, 6, 1, 2)];
+				return n;
+			}
+	
+			protected function getEdgeDefaults() : Object 
+			{
+				var e : Object = {};
+				e.lineWidth = 1;
+				e.lineColor = 0xFF000000;
+				e.lineAlpha = .5;
+				e.arrowType = ArrowType.TRIANGLE;
+				e.visible = false;
+				e.renderer = RelationBrowserEdgeRenderer.instance;
+				return e;
+			}
+	
+			public function getOperators() : Vector.<Operator> 
+			{
+				var ops : Vector.<Operator> = new Vector.<Operator>();
+				
+				// sample:
+				// color by cluster
+				var c : ColorEncoder = new ColorEncoder("props.cluster", Data.NODES, "lineColor", ScaleType.CATEGORIES, new ColorPalette(ColorPalette.CATEGORY_COLORS_10));
+				ops.push(c);
+				
+				ops.push(getScaleNodesByGraphDistanceEncoder(1.25, 1, .1));
+				ops.push(getScaleEdgesByGraphDistanceEncoder(4, 1, relationBrowser.showOuterEdges));
+				
+				return ops;
+			}
+	
+			protected function onNodeClicked(event : Event) : void 
+			{
+			}
+	
+			protected function onNodeSelectionFinished(event : Event) : void 
+			{
+			}
+	
+			protected function sendToJS(string : String, node : Node = null) : void 
+			{
+			}
+			
+			public function getScaleEdgesByGraphDistanceEncoder(max : Number, min : Number, showOuterEdges : Boolean = true) : PropertyEncoder 
+			{
+				// edge size encoder
+				var scaleEdges : Function = function(e : *) : Number 
+				{
+					var lineWidth : Number = max - e.source.props.distance - e.target.props.distance;
+					lineWidth = Math.max(min, lineWidth);
+					if(isNaN(lineWidth)) lineWidth = 0;
+					return lineWidth;
+				};
+				
+				// edge alpha encoder
+				var alphaEdges : Function = function(e : *) : Number 
+				{
+					if(!showOuterEdges && e.source.props.distance * e.target.props.distance > 0) {
+						return 0;
+					}
+					var a : Number = (4 - e.source.props.distance - e.target.props.distance) / 4;
+					a = Math.max(0.1, a);
+					if(isNaN(a)) a = 0;
+					return a;
+				};
+				
+				return new PropertyEncoder({"lineWidth":scaleEdges, "lineAlpha":alphaEdges}, Data.EDGES);
+			}
+	
+			public function getScaleNodesByGraphDistanceEncoder(centerScale : Number, innerRingScale : Number, outerRingScale : Number) : PropertyEncoder 
+			{
+				var scaleByDistance : Function = function(n : *) : Number 
+				{
+					if(n.props.distance == 0) 
+					{
+						return centerScale;
+					} 
+					else if(n.props.distance == 1) 
+					{
+						return innerRingScale;
+					}
+					return outerRingScale;
+				};
+				
+				return new PropertyEncoder({"scale":scaleByDistance}, Data.NODES);
+			}	
+			
+		private function loadDetailsForNode(id:String):void 
+		{
+			if (id==null) 
+			{
+				id='ArchitecturalDesign';
+			}
+			if (alreadyLoaded[id]) 
+			{
+				return;
+			}
+			
+			targetNodeId = id;
+			
+			var s:String="http://umbel.structureddynamics.com/explorer/explorer.php?concept="+id;
+			trace("loading... " + id);
+			alreadyLoaded[id]=true;
+			var loader:URLLoader = new URLLoader();
+			loader.load(new URLRequest(s));
+			loader.addEventListener(Event.COMPLETE, onNodesLoaded);
+		}
+
+
+		private function onNodesLoaded(e:Event):void 
+		{
+			var xml:XML=new XML(e.target.data);
+
+			for each (var node:XML in xml.Nodes.Node) 
+			{
+				trace("Node " + node.@id);
+				var o:Object={};
+				o.id=node.@id.toString();
+				o.name=node.@name.toString();
+				relationBrowser.addNode(new NodeData(o.id, o));
+				
+				//relationBrowser.addNodeForObject(o.id, o);
+			}
+
+			for each (var edge:XML in xml.Relations.children()) 
+			{
+				trace("Edge " + edge);
+				relationBrowser.addEdge(edge.@fromID.toString(), edge.@toID.toString());
+			}
+
+			relationBrowser.selectNodeByName(targetNodeId);
+		}
+
+
+		private function onNodeSelected(e:Event):void 
+		{
+			var n:Node=e.target.selectedNode;
+			
+			if (n) 
+			{
+				trace("onNodeSelected " + n);
+				loadDetailsForNode(n.data.id);
+			}
+		}
+
+			
+		]]>
+	</mx:Script>			
+
+	<mx:UIComponent id="RelationBrowseSpriteHolder" width="100%" height="100%"/>
+
+</mx:Application>

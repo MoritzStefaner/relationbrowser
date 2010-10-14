@@ -25,10 +25,9 @@ package eu.stefaner.relationbrowser {
 	import flash.utils.Dictionary;
 
 	public class RelationBrowser extends Visualization {
-
-		//--------------------------------------
+		// --------------------------------------
 		// CONSTRUCTOR
-		//--------------------------------------
+		// --------------------------------------
 		public var selectedNode : Node;
 		private var _depth : uint = 2;
 		public var layout : RadialLayout;
@@ -44,6 +43,8 @@ package eu.stefaner.relationbrowser {
 		public var showOuterEdges : Boolean = true;
 		public var showInterConnections : Boolean = false;
 		public var lastClickedNode : Node;
+		public var maxItems : Number;
+		public var maxItemCriterion : Array;
 
 		/**
 		 *@Constructor
@@ -64,11 +65,11 @@ package eu.stefaner.relationbrowser {
 		protected function initLayout() : void {
 			visibilityOperator = new VisibilityFilter("visibleNodes", [], depth);
 			operators.add(visibilityOperator);
-			
+
 			clusterer = new CommunityStructure();
 			clusterer.group = "visibleNodes";
 			operators.add(clusterer);
-			 
+
 			layout = new RadialLayout(sortBy);
 			operators.add(layout);
 		}
@@ -139,7 +140,7 @@ package eu.stefaner.relationbrowser {
 			}
 		}
 
-		public function selectNode(n : Node) : void {
+		public function selectNode(n : Node = null) : void {
 			Logger.info("onNodeSelected " + n);
 
 			if (n == selectedNode) {
@@ -162,15 +163,10 @@ package eu.stefaner.relationbrowser {
 			dispatchEvent(new Event(NODE_SELECTED));
 		}
 
-		public function updateDisplay() : void {
-			updateSelection(new Transitioner(1));
-		}
-
-		public function updateSelection(t : *= null) : Transitioner {
+		public function updateDisplay(t : Transitioner = null) : Transitioner {
 			Logger.info("updateSelection  " + selectedNode);
-
-			if (t != null) {
-				transitioner = Transitioner.instance(t);
+			if(!t) {
+				transitioner = new Transitioner(1);
 			}
 
 			if (!transitioner.hasEventListener(TransitionEvent.END)) {
@@ -200,15 +196,15 @@ package eu.stefaner.relationbrowser {
 			return transitioner;
 		}
 
-		private function onTransitionEnd(event : TransitionEvent) : void {
+		public function onTransitionEnd(event : TransitionEvent) : void {
 			dispatchEvent(new Event(NODE_SELECTION_FINISHED));
 		}
 
-		protected function preUpdate(t : Transitioner = null) : void {
+		public function preUpdate(t : Transitioner = null) : void {
 			t = Transitioner.instance(t);
 		}
 
-		protected function postUpdate(t : Transitioner = null) : void {
+		public function postUpdate(t : Transitioner = null) : void {
 			t = Transitioner.instance(t);
 		}
 
@@ -223,7 +219,7 @@ package eu.stefaner.relationbrowser {
 				// existing node: set new data
 				n.data = o;
 			}
-			
+
 			return n;
 		}
 
@@ -243,7 +239,7 @@ package eu.stefaner.relationbrowser {
 			if (d != null) {
 				e.data = d;
 			}
-			
+
 			try {
 				node1.addOutEdge(e);
 				node2.addInEdge(e);
@@ -313,7 +309,7 @@ package eu.stefaner.relationbrowser {
 				if (n.data.label == name) {
 					selectNode(n);
 				}
-			}			
+			}
 		}
 	}
 }

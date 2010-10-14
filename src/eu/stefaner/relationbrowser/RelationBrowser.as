@@ -5,8 +5,6 @@ package eu.stefaner.relationbrowser {
 	import eu.stefaner.relationbrowser.ui.Edge;
 	import eu.stefaner.relationbrowser.ui.Node;
 
-	import flare.analytics.cluster.CommunityStructure;
-	import flare.analytics.cluster.HierarchicalCluster;
 	import flare.animate.TransitionEvent;
 	import flare.animate.Transitioner;
 	import flare.util.Vectors;
@@ -18,6 +16,8 @@ package eu.stefaner.relationbrowser {
 	import flare.vis.data.EdgeSprite;
 	import flare.vis.events.SelectionEvent;
 	import flare.vis.operator.Operator;
+	import flare.vis.operator.layout.Layout;
+	import flare.vis.operator.layout.RandomLayout;
 
 	import org.osflash.thunderbolt.Logger;
 
@@ -25,14 +25,16 @@ package eu.stefaner.relationbrowser {
 	import flash.utils.Dictionary;
 
 	public class RelationBrowser extends Visualization {
+		private static const OVERVIEW_LAYOUT : String = "OVERVIEW_LAYOUT";
+		private static const DETAIL_LAYOUT : String = "DETAIL_LAYOUT";
 		// --------------------------------------
 		// CONSTRUCTOR
 		// --------------------------------------
 		public var selectedNode : Node;
 		private var _depth : uint = 2;
-		public var layout : RadialLayout;
+		public var detailLayout : RadialLayout;
+		public var overviewLayout : Layout;
 		public var visibilityOperator : VisibilityFilter;
-		protected var clusterer : HierarchicalCluster;
 		protected var transitioner : Transitioner = new Transitioner(1);
 		protected var nodesByID : Dictionary = new Dictionary();
 		protected var visibleNodes : DataList;
@@ -43,8 +45,7 @@ package eu.stefaner.relationbrowser {
 		public var showOuterEdges : Boolean = true;
 		public var showInterConnections : Boolean = false;
 		public var lastClickedNode : Node;
-		public var maxItems : Number;
-		public var maxItemCriterion : Array;
+		private var _layoutMode : String;
 
 		/**
 		 *@Constructor
@@ -66,12 +67,11 @@ package eu.stefaner.relationbrowser {
 			visibilityOperator = new VisibilityFilter("visibleNodes", [], depth);
 			operators.add(visibilityOperator);
 
-			clusterer = new CommunityStructure();
-			clusterer.group = "visibleNodes";
-			operators.add(clusterer);
+			detailLayout = new RadialLayout(sortBy);
+			operators.add(detailLayout);
 
-			layout = new RadialLayout(sortBy);
-			operators.add(layout);
+			overviewLayout = new RandomLayout();
+			operators.add(overviewLayout);
 		}
 
 		public var _nodeDefaults : Object;
@@ -154,37 +154,30 @@ package eu.stefaner.relationbrowser {
 
 			if (n != null) {
 				n.selected = true;
-			} else {
-				Logger.warn("RelationBrowser.selectNode: no selection");
-			}
+			} 
 
 			selectedNode = n;
 			updateDisplay();
 			dispatchEvent(new Event(NODE_SELECTED));
 		}
 
-		public function updateDisplay(t : Transitioner = null) : Transitioner {
+		public function updateDisplay() : void {
+			updateSelection(new Transitioner(1));
+		}
+
+		public function updateSelection(t : *= null) : Transitioner {
 			Logger.info("updateSelection  " + selectedNode);
-			if(!t) {
-				transitioner = new Transitioner(1);
-			}
+
+			transitioner = Transitioner.instance(t);
 
 			if (!transitioner.hasEventListener(TransitionEvent.END)) {
 				transitioner.addEventListener(TransitionEvent.END, onTransitionEnd, false, 0, true);
 			}
 
 			if (selectedNode == null) {
-				Logger.warn("RelationBrowser.updateSelection: no node selected");
-				// how to handle generally?
-				layout.enabled = false;
-				clusterer.enabled = false;
-				visibilityOperator.enabled = false;
+				layoutMode = OVERVIEW_LAYOUT;
 			} else {
-				layout.enabled = true;
-				visibilityOperator.enabled = true;
-				clusterer.enabled = true;
-				layout.layoutRoot = selectedNode;
-				visibilityOperator.focusNodes = Vectors.copyFromArray([selectedNode]);
+				layoutMode = DETAIL_LAYOUT;
 			}
 
 			preUpdate(transitioner);
@@ -196,15 +189,37 @@ package eu.stefaner.relationbrowser {
 			return transitioner;
 		}
 
-		public function onTransitionEnd(event : TransitionEvent) : void {
+		protected function set layoutMode(m : String) : void {
+			_layoutMode = m;
+			switch(m) {
+				case OVERVIEW_LAYOUT:
+					detailLayout.enabled = false;
+					visibilityOperator.enabled = false;
+					overviewLayout.enabled = true;
+					break;
+				case DETAIL_LAYOUT:
+					overviewLayout.enabled = false;
+					detailLayout.enabled = true;
+					visibilityOperator.enabled = true;
+					detailLayout.layoutRoot = selectedNode;
+					visibilityOperator.focusNodes = Vectors.copyFromArray([selectedNode]);
+					break;
+			}
+		}
+
+		public function get layoutMode() : String {
+			return _layoutMode;
+		}
+
+		private function onTransitionEnd(event : TransitionEvent) : void {
 			dispatchEvent(new Event(NODE_SELECTION_FINISHED));
 		}
 
-		public function preUpdate(t : Transitioner = null) : void {
+		protected function preUpdate(t : Transitioner = null) : void {
 			t = Transitioner.instance(t);
 		}
 
-		public function postUpdate(t : Transitioner = null) : void {
+		protected function postUpdate(t : Transitioner = null) : void {
 			t = Transitioner.instance(t);
 		}
 
@@ -294,8 +309,8 @@ package eu.stefaner.relationbrowser {
 
 		public function set sortBy(sortBy : Array) : void {
 			_sortBy = sortBy;
-			if (layout) {
-				layout.sortBy = sortBy;
+			if (detailLayout) {
+				detailLayout.sortBy = sortBy;
 				updateDisplay();
 			}
 		}

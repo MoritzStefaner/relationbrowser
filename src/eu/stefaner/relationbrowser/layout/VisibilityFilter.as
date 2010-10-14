@@ -65,10 +65,12 @@ package eu.stefaner.relationbrowser.layout {
 			}
 			// now set visibility based on traversal results
 			visualization.data.visit(function(ds : DataSprite):void {
+				
 				var visible : Boolean = (depths[ds] != undefined);
 				var alpha : Number = visible ? 1 : 0;
 				var obj : Object = t.$(ds);
 				obj.alpha = alpha;
+				
 				if (ds is NodeSprite) {
 					var ns : NodeSprite = ds as NodeSprite;
 					ns.expanded = (visible && depths[ds] < distance);

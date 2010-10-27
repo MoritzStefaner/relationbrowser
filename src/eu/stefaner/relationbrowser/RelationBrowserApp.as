@@ -91,12 +91,8 @@
 		protected function initDisplay() : void {
 			Logger.info("RelationBrowserApp: initDisplay");
 			relationBrowser = createRelationBrowser();
-			relationBrowser.bounds = new Rectangle(0, 0, 1000, 600);
-			relationBrowser.x = 500;
-			relationBrowser.y = 300;
-			// relationBrowser.bounds = new Rectangle(0, 0, parent.width, parent.height);
-			// relationBrowser.x = parent.width * .5;
-			// relationBrowser.y = parent.height * .5;
+			relationBrowser.bounds = new Rectangle(0, 0, parent.width, parent.height);
+			relationBrowser.x = parent.width * .5;			relationBrowser.y = parent.height * .5;
 			relationBrowser.addOperators(getOperators());
 			relationBrowser.nodeDefaults = getNodeDefaults();
 			relationBrowser.edgeDefaults = getEdgeDefaults();

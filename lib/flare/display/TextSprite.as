@@ -266,6 +266,8 @@ package flare.display {
 					break;
 				case EMBED:
 					_tf.embedFonts = true;
+					// edit mo
+					//_tf.antiAliasType = AntiAliasType.ADVANCED;
 				case DEVICE:
 					addChild(_tf);
 					break;

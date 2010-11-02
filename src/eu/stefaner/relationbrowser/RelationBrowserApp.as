@@ -1,4 +1,5 @@
 ﻿package eu.stefaner.relationbrowser {
+	import flash.display.Stage;
 	import eu.stefaner.relationbrowser.encoders.Encoders;
 	import eu.stefaner.relationbrowser.layout.RelationBrowserEdgeRenderer;
 	import eu.stefaner.relationbrowser.ui.Node;
@@ -14,6 +15,8 @@
 	import org.osflash.thunderbolt.Logger;
 
 	import flash.display.Sprite;
+	import flash.display.StageAlign;
+	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.external.ExternalInterface;
 	import flash.filters.DropShadowFilter;
@@ -27,15 +30,23 @@
 
 		public function RelationBrowserApp() {
 			super();
-			initExternalInterface();
-			initStageListeners();
 			startUp();
 		}
 
-		private function initStageListeners() : void {			// stage.addEventListener(Event.RESIZE, onResize);
+		protected function initStage() : void {
+			stage.scaleMode = StageScaleMode.NO_SCALE;
+			stage.align = StageAlign.TOP_LEFT;
+			stage.addEventListener(Event.RESIZE, onResize);
+			try {
+				// stage.displayState = StageDisplayState.FULL_SCREEN;
+			} catch (e : Error) {
+			}
 		}
 
 		protected function onResize(event : Event = null) : void {
+			relationBrowser.bounds = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
+			relationBrowser.x = stage.stageWidth * .5;
+			relationBrowser.y = stage.stageHeight * .5;
 		}
 
 		protected function initExternalInterface() : void {
@@ -57,6 +68,8 @@
 
 		protected function startUp() : void {
 			Logger.info("startUp");
+			initStage();
+			initExternalInterface();
 			loadData();
 			initDisplay();
 		}
@@ -91,9 +104,9 @@
 		protected function initDisplay() : void {
 			Logger.info("RelationBrowserApp: initDisplay");
 			relationBrowser = createRelationBrowser();
-			relationBrowser.bounds = new Rectangle(0, 0, parent.width, parent.height);
-			relationBrowser.x = parent.width * .5;
-			relationBrowser.y = parent.height * .5;
+
+			onResize();
+
 			relationBrowser.addOperators(getOperators());
 			relationBrowser.nodeDefaults = getNodeDefaults();
 			relationBrowser.edgeDefaults = getEdgeDefaults();

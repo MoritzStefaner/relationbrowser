@@ -70,6 +70,7 @@
 
 		/**		 * PROTECTED		 */
 		protected function adjustTitleFieldSize() : void {
+			title_tf.width = 1000;
 			title_tf.width = Math.min(title_tf.textWidth + 10, maxTextFieldWidth);
 			title_tf.height = title_tf.textHeight + 5;
 			title_tf.x = -.5 * title_tf.width + u + w * .5;

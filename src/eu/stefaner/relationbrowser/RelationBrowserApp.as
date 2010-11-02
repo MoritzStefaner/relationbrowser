@@ -1,5 +1,6 @@
 ﻿package eu.stefaner.relationbrowser {
 	import flash.display.Stage;
+
 	import eu.stefaner.relationbrowser.encoders.Encoders;
 	import eu.stefaner.relationbrowser.layout.RelationBrowserEdgeRenderer;
 	import eu.stefaner.relationbrowser.ui.Node;
@@ -104,7 +105,7 @@
 		protected function initDisplay() : void {
 			Logger.info("RelationBrowserApp: initDisplay");
 			relationBrowser = createRelationBrowser();
-
+			
 			onResize();
 
 			relationBrowser.addOperators(getOperators());

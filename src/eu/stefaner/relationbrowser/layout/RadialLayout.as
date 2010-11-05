@@ -14,30 +14,29 @@
 
 		public function RadialLayout(sortBy : Array = null) {
 			this.sortBy = sortBy ? sortBy : [];
-			layoutType = Layout.CARTESIAN;
+			layoutType = Layout.POLAR;
 		}
 
 		protected override function layout() : void {
-			autoAnchor();
+			// autoAnchor();
 			var selectedNode : Node = (layoutRoot as Node);
+
 			var r : Number = .5 * Math.max(visualization.bounds.width, visualization.bounds.height);
-			// FIX ME: temp test, was causing issues, need to investigate
-			r = 500;
-			visualization.data.nodes.setProperties({radius:r, origin:_anchor}, _t);
+
+			visualization.data.nodes.setProperties({radius:r}, _t);
 			_t.$(selectedNode).radius = .001;
+
 			var innerRing : DataList = new DataList("inner");
-			var outerRing : DataList = new DataList("outer");
+
 			visualization.data.group("visibleNodes").visit(function(n : Node) : void {
 				if (n == selectedNode) {
 					return;
 				} else if (n.props.distance == 1) {
 					innerRing.add(n);
-				} else {
-					outerRing.add(n);
 				}
 			});
 			innerRing.sortBy(sortBy);
-			outerRing.sortBy(sortBy);
+
 			var angleInc : Number = (Math.PI * 2.0) / innerRing.length;
 			var counter : uint = innerRing.length;
 			var n : Node;
@@ -53,30 +52,6 @@
 				angle = angleInc * counter--;
 				_t.$(n).angle = angle;
 				n.parent.addChild(n);
-			}
-			angleInc = (Math.PI * 2.0) / outerRing.length;
-			counter = outerRing.length;
-			for each (n in outerRing) {
-				// TODO: introduce outerradius var, express as fraction of layoutBounds.width
-				_t.$(n).radius = innerRadius * .5 + innerRadius * .5 * n.props.distance;
-				angle = angleInc * counter--;
-				_t.$(n).angle = angle;
-				// get number of connections to inner ring				
-				var numVisibleLinks : int = 0;
-				n.visitNodes(function(n2 : Node) : void {
-					numVisibleLinks++;
-				}, NodeSprite.ALL_LINKS, eq("props.distance", 1));
-				// shift positions
-				// TODO: this is just a rough approximation, think of better placement algorithm
-				n.visitNodes(function(n2 : Node) : void {
-					var a1 : Number = Math.min(_t.$(n2).angle, _t.$(n).angle);
-					var a2 : Number = Math.max(_t.$(n2).angle, _t.$(n).angle);
-					var angleDiff : Number = a2 - a1;
-					if (angleDiff > Math.PI) {
-						angleDiff -= 2 * Math.PI;
-					}
-					_t.$(n).angle += angleDiff * .75 / numVisibleLinks;
-				}, NodeSprite.ALL_LINKS, eq("props.distance", 1));
 			}
 		}
 	}

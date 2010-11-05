@@ -1,6 +1,4 @@
 ﻿package eu.stefaner.relationbrowser {
-	import flash.display.Stage;
-
 	import eu.stefaner.relationbrowser.encoders.Encoders;
 	import eu.stefaner.relationbrowser.layout.RelationBrowserEdgeRenderer;
 	import eu.stefaner.relationbrowser.ui.Node;
@@ -12,6 +10,9 @@
 	import flare.vis.data.render.ArrowType;
 	import flare.vis.operator.Operator;
 	import flare.vis.operator.encoder.ColorEncoder;
+
+	import com.asual.swfaddress.SWFAddress;
+	import com.asual.swfaddress.SWFAddressEvent;
 
 	import org.osflash.thunderbolt.Logger;
 
@@ -28,27 +29,69 @@
 		public var dataURL : String;
 		public var configURL : String;
 		protected var relationBrowser : RelationBrowser;
+		protected var baseTitle : String;
 
 		public function RelationBrowserApp() {
 			super();
 			startUp();
 		}
 
+		protected function startUp() : void {
+			Logger.info("startUp");
+			initStage();
+			initExternalInterface();
+			initSWFAddress();
+			loadData();
+			initDisplay();
+		}
+
+		protected function initSWFAddress() : void {
+			SWFAddress.addEventListener(SWFAddressEvent.EXTERNAL_CHANGE, onURLparamChanged);
+			baseTitle = SWFAddress.getTitle();
+		}
+
+		protected function onURLparamChanged(event : SWFAddressEvent = null) : void {
+			Logger.info("urlparam changed", getIDFromURL());
+			selectNodeByID(getIDFromURL());
+		}
+
+		protected function getIDFromURL() : String {
+			try {
+				return SWFAddress.getValue().split("/")[1];
+			} catch (error : Error) {
+			}
+			return null;
+		}
+
+		protected function setIDInURL(id : String = "") : void {
+			SWFAddress.setValue(id);
+		}
+
+		private function storeSelectionInURL() : void {
+			if (relationBrowser.selectedNode) {
+				SWFAddress.setValue(relationBrowser.selectedNode.data.id);
+				SWFAddress.setTitle(baseTitle + " : " + relationBrowser.selectedNode.data.label);
+			} else {
+				SWFAddress.setValue("");
+				SWFAddress.setTitle(baseTitle);
+			}
+		}
+
 		protected function initStage() : void {
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
 			stage.addEventListener(Event.RESIZE, onResize);
-			try {
-				// stage.displayState = StageDisplayState.FULL_SCREEN;
+			try {				// stage.displayState = StageDisplayState.FULL_SCREEN;
 			} catch (e : Error) {
 			}
-		}
+		};
 
 		protected function onResize(event : Event = null) : void {
+			;
 			relationBrowser.bounds = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
 			relationBrowser.x = stage.stageWidth * .5;
 			relationBrowser.y = stage.stageHeight * .5;
-		}
+		};
 
 		protected function initExternalInterface() : void {
 			if (ExternalInterface.available) {
@@ -57,23 +100,16 @@
 				} catch(e : Error) {
 				}
 			}
-		}
+		};
 
+		// for external JS calls
 		public function selectNodeByID(id : String = null) : void {
 			try {
 				relationBrowser.selectNodeByID(id);
 			} catch(e : Error) {
 				Logger.error("Could not select node by id", id);
 			}
-		}
-
-		protected function startUp() : void {
-			Logger.info("startUp");
-			initStage();
-			initExternalInterface();
-			loadData();
-			initDisplay();
-		}
+		};
 
 		// call when everything is set up, to get startID from Javascript
 		protected function onDataAndDisplayReady() : void {
@@ -87,27 +123,26 @@
 			addChild(relationBrowser);
 			relationBrowser.nodeDefaults = getNodeDefaults();
 			relationBrowser.edgeDefaults = getEdgeDefaults();
-			relationBrowser.selectNode();
-		}
+			// relationBrowser.selectNode();
+			onURLparamChanged();
+		};
 
 		protected function loadData() : void {
 			Logger.info("loadData");
-		}
+		};
 
 		protected function loadCSV(nodesFileURL : String, relationsFileURL : String) : void {
 			Logger.info("loadCSV");
-		}
+		};
 
 		protected function loadGraphML(graphmlFileURL : String) : void {
 			Logger.info("loadGraphML");
-		}
+		};
 
 		protected function initDisplay() : void {
 			Logger.info("RelationBrowserApp: initDisplay");
 			relationBrowser = createRelationBrowser();
-			
 			onResize();
-
 			relationBrowser.addOperators(getOperators());
 			relationBrowser.nodeDefaults = getNodeDefaults();
 			relationBrowser.edgeDefaults = getEdgeDefaults();
@@ -116,7 +151,7 @@
 			relationBrowser.addEventListener(RelationBrowser.NODE_CLICKED, onNodeClicked);
 			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTED, onNodeSelected);
 			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTION_FINISHED, onNodeSelectionFinished);
-		}
+		};
 
 		protected function getNodeDefaults() : Object {
 			var n : Object = {};
@@ -132,7 +167,7 @@
 			n.filters = [new DropShadowFilter(4, 45, 0, .33, 6, 6, 1, 2)];
 			// n["title_tf.filters"] = [new DropShadowFilter(4, 45, 0, .1, 6, 6, 1, 2)];
 			return n;
-		}
+		};
 
 		protected function getEdgeDefaults() : Object {
 			var e : Object = {};
@@ -162,6 +197,7 @@
 
 		protected function onNodeSelected(event : Event) : void {
 			sendToJS("onNodeSelected", relationBrowser.selectedNode);
+			storeSelectionInURL();
 		}
 
 		protected function onNodeSelectionFinished(event : Event) : void {

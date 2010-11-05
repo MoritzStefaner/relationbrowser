@@ -16,7 +16,7 @@ package eu.stefaner.relationbrowser.layout {
 		public var visibleNodesGroupName : String;
 
 		public function VisibilityFilter(visibleNodesGroupName : String, focusNodes : Array = null, distance : int = 1, links : int = 3) {
-			super(Vectors.copyFromArray(focusNodes), distance, links);
+			super(focusNodes, distance, links);
 			this.visibleNodesGroupName = visibleNodesGroupName;
 		}
 

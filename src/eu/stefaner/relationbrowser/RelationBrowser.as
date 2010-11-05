@@ -181,7 +181,7 @@
 					detailLayout.enabled = true;
 					visibilityOperator.enabled = true;
 					detailLayout.layoutRoot = selectedNode;
-					visibilityOperator.focusNodes = Vectors.copyFromArray([selectedNode]);
+					visibilityOperator.focusNodes = [selectedNode];
 					break;
 			}
 		}

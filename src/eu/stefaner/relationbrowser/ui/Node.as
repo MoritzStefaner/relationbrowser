@@ -145,21 +145,6 @@
 			render();
 		}
 
-		private var _selected : Boolean;
-
-		public function get selected() : Boolean {
-			return _selected;
-		}
-
-		public function set selected(value : Boolean) : void {
-			if (value !== _selected) {
-				_selected = value;
-			}
-			if (value) {
-				visited = true;
-			}
-		}
-
 		private var _scale : Number = 1;
 
 		public function get scale() : Number {

@@ -1,12 +1,9 @@
 ﻿package eu.stefaner.relationbrowser.layout {
+	import eu.stefaner.relationbrowser.RelationBrowser;
 	import eu.stefaner.relationbrowser.ui.Node;
 
-	import flare.query.methods.eq;
 	import flare.vis.data.DataList;
-	import flare.vis.data.NodeSprite;
 	import flare.vis.operator.layout.Layout;
-
-	import flash.display.DisplayObjectContainer;
 
 	/**	 * @author mo	 */
 	public class RadialLayout extends Layout {
@@ -28,7 +25,7 @@
 
 			var innerRing : DataList = new DataList("inner");
 
-			visualization.data.group("visibleNodes").visit(function(n : Node) : void {
+			visualization.data.group(RelationBrowser.VISIBLE_NODES).visit(function(n : Node) : void {
 				if (n == selectedNode) {
 					return;
 				} else if (n.props.distance == 1) {

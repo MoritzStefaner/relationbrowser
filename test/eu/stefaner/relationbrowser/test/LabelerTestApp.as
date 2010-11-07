@@ -13,7 +13,8 @@ package eu.stefaner.relationbrowser.test {
 
 		override protected function loadData() : void {
 			for (var i : int = 0; i < 50; i++) {
-				relationBrowser.addNode(new NodeData(String(i)));
+				var nd : NodeData = new NodeData(String(i), {}, randomLabel(String(i)));
+				relationBrowser.addNode(nd);
 			}
 
 			for each (var n:Node in relationBrowser.data.nodes) {
@@ -24,6 +25,17 @@ package eu.stefaner.relationbrowser.test {
 				}
 			}
 			onDataAndDisplayReady();
+		}
+
+		private function randomLabel(string : String) : String {
+			while (Math.random() > .01) {
+				if (Math.random() < .2) {
+					string += " ";
+				} else {
+					string += Math.floor(Math.random() * 10);
+				}
+			}
+			return string;
 		}
 	}
 }

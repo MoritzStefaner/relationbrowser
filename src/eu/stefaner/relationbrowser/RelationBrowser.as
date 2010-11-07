@@ -23,6 +23,7 @@
 
 	import flash.events.Event;
 	import flash.text.TextFormat;
+	import flash.text.TextFormatAlign;
 	import flash.utils.Dictionary;
 
 	public class RelationBrowser extends Visualization {
@@ -41,7 +42,6 @@
 		protected var nodesByID : Dictionary = new Dictionary();
 		protected var visibleNodes : DataList;
 		protected var visibleEdges : DataList;
-		
 		public var showInterConnections : Boolean = false;
 		public var lastClickedNode : Node;
 		private var _layoutMode : String;
@@ -72,6 +72,11 @@
 
 		protected function createNodeLabeler() : NodeLabeler {
 			var tf : TextFormat = new TextFormat();
+			tf.align = TextFormatAlign.CENTER;
+			tf.font = "Arial";
+			tf.size = 11;
+			tf.bold = true;
+			tf.color = 0x333333;
 			var l : NodeLabeler = new NodeLabeler("data.label", tf);
 			return l;
 		}

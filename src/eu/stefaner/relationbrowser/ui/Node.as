@@ -17,9 +17,10 @@
 
 	public class Node extends NodeSprite {
 		public var t : Transitioner;
-		private var _labelSprite : TextSprite;
+		protected var _labelSprite : TextSprite;
 		private var runningRollOverTransition : Boolean;
 		private var doRollOutAfterTransitionEnd : Boolean;
+		//private static var _devNullTextSprite : TextSprite = new TextSprite();
 
 		/**		 *@Constructor		 */
 		public function Node(data : NodeData = null) {

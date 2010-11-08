@@ -9,9 +9,9 @@ package eu.stefaner.relationbrowser {
 	 * @author mo
 	 */
 	public class NodeLabeler extends Labeler {
-		public function NodeLabeler(source : * = null, format : TextFormat = null, policy : String = LAYER, textMode : int = TextSprite.BITMAP, filter : * = null) {
-			super(source, Data.NODES, format, filter, policy);
+		public function NodeLabeler(source : * = null, format : TextFormat = null, policy : String = "layer", textMode : uint = 1, filter : * = null) {
 			this.textMode = textMode;
+			super(source, Data.NODES, format, filter, policy);
 			access = "labelSprite";
 		}
 	}

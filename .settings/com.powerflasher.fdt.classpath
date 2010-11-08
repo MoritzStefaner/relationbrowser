@@ -6,4 +6,5 @@
     <AS3Classpath generateProblems="true" sdkBased="false" type="source" useAsSharedCode="false">flare/flare/src</AS3Classpath>
     <AS3Classpath generateProblems="true" sdkBased="false" type="source" useAsSharedCode="false">lib</AS3Classpath>
     <AS3Classpath generateProblems="false" sdkBased="false" type="lib" useAsSharedCode="false">lib/SWFAddress.swc</AS3Classpath>
+    <AS3Classpath generateProblems="true" sdkBased="false" type="source" useAsSharedCode="false">test</AS3Classpath>
 </AS3Classpath>

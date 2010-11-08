@@ -1,4 +1,10 @@
 ﻿package eu.stefaner.relationbrowser.ui {
+	import flare.display.render.BackgroundRenderer;
+
+	import flash.text.TextFormatAlign;
+
+	import flare.display.TextSprite;
+
 	import eu.stefaner.relationbrowser.data.NodeData;
 
 	import flare.animate.TransitionEvent;
@@ -7,58 +13,20 @@
 	import flare.vis.data.EdgeSprite;
 	import flare.vis.data.NodeSprite;
 
-	import org.osflash.thunderbolt.Logger;
-
-	import flash.display.Sprite;
 	import flash.events.Event;
-	import flash.text.TextField;
 
-	/**	 *Class description.	 *	 *@langversion ActionScript 3.0	 *@playerversion Flash 9.0	 *	 *@author mo	 *@since  05.11.2007	 */
 	public class Node extends NodeSprite {
-		public var title_tf : TextField;
 		public var t : Transitioner;
-		public var icon : Class;
-		protected var iconAdded : Boolean;
-		protected var iconSprite : Sprite;
+		private var _labelSprite : TextSprite;
 		private var runningRollOverTransition : Boolean;
 		private var doRollOutAfterTransitionEnd : Boolean;
-		public var maxTextFieldWidth : Number = 120;
 
 		/**		 *@Constructor		 */
-		public function Node(data : NodeData = null, icon : Class = null) {
+		public function Node(data : NodeData = null) {
 			super();
-			if (!title_tf) {
-				createTitleField();
-			}
 			this.data = data;
-			this.icon = icon;
-			if (icon) {
-				renderer = null;
-			}
 			mouseChildren = false;
 			Displays.addStageListener(this, Event.ADDED_TO_STAGE, onStageInit);
-		}
-
-		protected function createTitleField() : void {
-			title_tf = new TextField();
-			addChild(title_tf);
-		}
-
-		/**		 * PUBLIC		 */
-		public override function render() : void {
-			super.render();
-			if (icon && !iconAdded) {
-				iconAdded = true;
-				try {
-					iconSprite = Sprite(addChildAt(new icon(), 0));
-				} catch (e : Error) {
-					Logger.error("no icon class found for", icon);
-				}
-			}
-			if (data) {
-				title_tf.text = data.label || "";
-				adjustTitleFieldSize();
-			}
 		}
 
 		public function show(_t : Transitioner = null) : void {
@@ -66,15 +34,6 @@
 			_t.$(this).alpha = 1;
 			_t.$(this).visible = true;
 			visible = true;
-		}
-
-		/**		 * PROTECTED		 */
-		protected function adjustTitleFieldSize() : void {
-			title_tf.width = 1000;
-			title_tf.width = Math.min(title_tf.textWidth + 10, maxTextFieldWidth);
-			title_tf.height = title_tf.textHeight + 5;
-			title_tf.x = -.5 * title_tf.width + u + w * .5;
-			title_tf.y = -.5 * title_tf.height + v + h * .5;
 		}
 
 		public function onClick() : void {
@@ -139,7 +98,7 @@
 
 		override public function set data(data : Object) : void {
 			if (!data is NodeData) {
-				throw new Error("NodeData expected!");
+				throw new Error("Sorry, NodeData expected!");
 			}
 			super.data = data;
 			render();
@@ -155,7 +114,6 @@
 			scaleX = scale;
 			scaleY = scale;
 			_scale = scale;
-			// title_tf.visible = scale > .66;
 		}
 
 		private var _edgeRadius : Number = -1;
@@ -168,14 +126,23 @@
 			_edgeRadius = edgeRadius;
 		}
 
-		private var _visited : Boolean = false;
-
-		public function get visited() : Boolean {
-			return _visited;
+		public function get labelSprite() : TextSprite {
+			return _labelSprite;
 		}
 
-		public function set visited(visited : Boolean) : void {
-			_visited = visited;
+		public function set labelSprite(labelSprite : TextSprite) : void {
+			_labelSprite = labelSprite;
+			initLabelSprite();
+		}
+
+		protected function initLabelSprite() : void {
+			_labelSprite.maxWidth = 100;
+			_labelSprite.textFormat.align = TextFormatAlign.CENTER;
+
+			_labelSprite.backgroundFill = true;
+			_labelSprite.backgroundFillColor = 0xFF999999;
+			_labelSprite.backgroundBorder = true;
+			_labelSprite.backgroundBorderColor = 0xFF555555;
 		}
 	}
 }

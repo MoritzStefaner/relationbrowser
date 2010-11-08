@@ -1,15 +1,10 @@
 ﻿package eu.stefaner.relationbrowser {
-	import eu.stefaner.relationbrowser.encoders.Encoders;
 	import eu.stefaner.relationbrowser.layout.RelationBrowserEdgeRenderer;
 	import eu.stefaner.relationbrowser.ui.Node;
 
-	import flare.scale.ScaleType;
 	import flare.util.Shapes;
-	import flare.util.palette.ColorPalette;
-	import flare.vis.data.Data;
 	import flare.vis.data.render.ArrowType;
 	import flare.vis.operator.Operator;
-	import flare.vis.operator.encoder.ColorEncoder;
 
 	import com.asual.swfaddress.SWFAddress;
 	import com.asual.swfaddress.SWFAddressEvent;
@@ -21,7 +16,6 @@
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.external.ExternalInterface;
-	import flash.filters.DropShadowFilter;
 	import flash.geom.Rectangle;
 
 	/**	 * @author mo	 */
@@ -41,8 +35,8 @@
 			initStage();
 			initExternalInterface();
 			initSWFAddress();
-			loadData();
 			initDisplay();
+			loadData();
 		}
 
 		protected function initSWFAddress() : void {
@@ -87,7 +81,6 @@
 		};
 
 		protected function onResize(event : Event = null) : void {
-			;
 			relationBrowser.bounds = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
 			relationBrowser.x = stage.stageWidth * .5;
 			relationBrowser.y = stage.stageHeight * .5;
@@ -123,7 +116,6 @@
 			addChild(relationBrowser);
 			relationBrowser.nodeDefaults = getNodeDefaults();
 			relationBrowser.edgeDefaults = getEdgeDefaults();
-			// relationBrowser.selectNode();
 			onURLparamChanged();
 		};
 
@@ -156,38 +148,26 @@
 		protected function getNodeDefaults() : Object {
 			var n : Object = {};
 			n.lineWidth = 2;
-			n.lineColor = 0xAA666666;
-			n.fillColor = 0xDD333333;
+			n.lineColor = 0x33000000;
+			n.fillColor = 0x22000000;
 			n.shape = Shapes.CIRCLE;
 			n.w = n.h = 80;
 			n.size = 8;
 			n.edgeRadius = 55;
-			n.visible = false;
-			// n.blendMode = BlendMode.MULTIPLY;
-			n.filters = [new DropShadowFilter(4, 45, 0, .33, 6, 6, 1, 2)];
-			// n["title_tf.filters"] = [new DropShadowFilter(4, 45, 0, .1, 6, 6, 1, 2)];
 			return n;
 		};
 
 		protected function getEdgeDefaults() : Object {
 			var e : Object = {};
-			e.lineWidth = 1;
-			e.lineColor = 0xFF000000;
-			e.lineAlpha = .5;
+			e.lineWidth = 2;
+			e.lineColor = 0x33000000;
 			e.arrowType = ArrowType.TRIANGLE;
-			e.visible = false;
 			e.renderer = RelationBrowserEdgeRenderer.instance;
 			return e;
 		}
 
 		public function getOperators() : Vector.<Operator> {
 			var ops : Vector.<Operator> = new Vector.<Operator>();
-			// sample:
-			// color by cluster
-			var c : ColorEncoder = new ColorEncoder("props.cluster", Data.NODES, "lineColor", ScaleType.CATEGORIES, new ColorPalette(ColorPalette.CATEGORY_COLORS_10));
-			ops.push(c);
-			ops.push(Encoders.getScaleNodesByGraphDistanceEncoder(1.25, 1, .1));
-			ops.push(Encoders.getScaleEdgesByGraphDistanceEncoder(4, 1, relationBrowser.showOuterEdges));
 			return ops;
 		}
 
@@ -197,6 +177,7 @@
 
 		protected function onNodeSelected(event : Event) : void {
 			sendToJS("onNodeSelected", relationBrowser.selectedNode);
+			Logger.info("onNodeSelected", relationBrowser.selectedNode ? relationBrowser.selectedNode.data.label : "<none>");
 			storeSelectionInURL();
 		}
 
@@ -208,13 +189,13 @@
 			if (node && node.data) {
 				try {
 					ExternalInterface.call(string, node.data);
-					Logger.info("sendToJS:", string, node.data);
+					// Logger.info("sendToJS:", string, node.data);
 				} catch(e : Error) {
 				}
 			} else {
 				try {
 					ExternalInterface.call(string, {});
-					Logger.info("sendToJS:", string);
+					// Logger.info("sendToJS:", string);
 				} catch(e : Error) {
 				}
 			}

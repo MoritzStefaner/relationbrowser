@@ -28,7 +28,7 @@ package eu.stefaner.relationbrowser.layout {
 			var q : Array = [], depths : Dictionary = new Dictionary();
 			for each (var fn:NodeSprite in focusNodes) {
 				depths[fn] = 0;
-				fn.visitEdges(function(e : EdgeSprite):void {
+				fn.visitEdges(function(e : EdgeSprite) : void {
 					depths[e] = 1;
 					q.push(e);
 				}, links);
@@ -49,13 +49,13 @@ package eu.stefaner.relationbrowser.layout {
 				// -- end fix
 				depths[xn] = d;
 				if (d == distance) {
-					xn.visitEdges(function(e : EdgeSprite):void {
+					xn.visitEdges(function(e : EdgeSprite) : void {
 						if (depths[e.target] == d && depths[e.source] == d) {
 							depths[e] = d + 1;
 						}
 					}, links);
 				} else {
-					xn.visitEdges(function(e : EdgeSprite):void {
+					xn.visitEdges(function(e : EdgeSprite) : void {
 						if (depths[e] == undefined) {
 							depths[e] = d + 1;
 							q.push(e);
@@ -64,19 +64,18 @@ package eu.stefaner.relationbrowser.layout {
 				}
 			}
 			// now set visibility based on traversal results
-			visualization.data.visit(function(ds : DataSprite):void {
-				
+			visualization.data.visit(function(ds : DataSprite) : void {
 				var visible : Boolean = (depths[ds] != undefined);
 				var alpha : Number = visible ? 1 : 0;
 				var obj : Object = t.$(ds);
 				obj.alpha = alpha;
-				
+
 				if (ds is NodeSprite) {
 					var ns : NodeSprite = ds as NodeSprite;
 					ns.expanded = (visible && depths[ds] < distance);
 					// added by mo
-					if(depths[ds] != undefined) {
-						if(ns.props.distance == null || depths[ds] < ns.props.distance) {
+					if (depths[ds] != undefined) {
+						if (ns.props.distance == null || depths[ds] < ns.props.distance) {
 							ns.props.distance = depths[ds];
 						}
 					} else {
@@ -90,18 +89,18 @@ package eu.stefaner.relationbrowser.layout {
 					obj.visible = visible;
 				}
 			});
-			
+
 			var dl : DataList = visualization.data.group(visibleNodesGroupName);
 			dl.clear();
-			
+
 			visualization.data.nodes.visit(function(n : NodeSprite) : void {
-				if((t.immediate && n.visible) || t.$(n).visible) {
+				if ((t.immediate && n.visible) || t.$(n).visible) {
 					dl.add(n);
-					/*					if(focusNodes.indexOf(n) > -1) {						n.props.distance = 0;					} else if(n.isConnected(focusNodes[0])) {						n.props.distance = 1;					} else {						n.props.distance = Math.max(2, Math.ceil(-n.props.doi));					}					 * */
 				}
 			});
-			if(!(visualization as RelationBrowser).showInterConnections && !(visualization as RelationBrowser).showOuterEdges) {
-				visualization.data.edges.setProperty("alpha", function(e : *):Boolean {
+
+			if (!(visualization as RelationBrowser).showInterConnections) {
+				visualization.data.edges.setProperty("alpha", function(e : *) : Boolean {
 					return e.source.props.distance * e.target.props.distance == 0;
 				}, t);
 			}

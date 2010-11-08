@@ -8,7 +8,6 @@
 
 	import flare.animate.TransitionEvent;
 	import flare.animate.Transitioner;
-	import flare.util.Vectors;
 	import flare.vis.Visualization;
 	import flare.vis.controls.ClickControl;
 	import flare.vis.controls.HoverControl;
@@ -23,16 +22,19 @@
 	import org.osflash.thunderbolt.Logger;
 
 	import flash.events.Event;
+	import flash.text.TextFormat;
+	import flash.text.TextFormatAlign;
 	import flash.utils.Dictionary;
 
 	public class RelationBrowser extends Visualization {
 		public static const OVERVIEW_LAYOUT : String = "OVERVIEW_LAYOUT";
 		public static const DETAIL_LAYOUT : String = "DETAIL_LAYOUT";
-		// --------------------------------------
-		// CONSTRUCTOR
-		// --------------------------------------
+		public static const VISIBLE_NODES : String = "VISIBLE_NODES";
+		public static const NODE_SELECTED : String = "NODE_SELECTED";
+		public static const NODE_SELECTION_FINISHED : String = "NODE_SELECTION_FINISHED";
+		public static const NODE_CLICKED : String = "NODE_CLICKED";
 		public var selectedNode : Node;
-		private var _depth : uint = 2;
+		private var _depth : uint = 1;
 		public var detailLayout : Layout;
 		public var overviewLayout : Layout;
 		public var visibilityOperator : VisibilityFilter;
@@ -40,13 +42,10 @@
 		protected var nodesByID : Dictionary = new Dictionary();
 		protected var visibleNodes : DataList;
 		protected var visibleEdges : DataList;
-		public static const NODE_SELECTED : String = "NODE_SELECTED";
-		public static const NODE_SELECTION_FINISHED : String = "NODE_SELECTION_FINISHED";
-		public static const NODE_CLICKED : String = "NODE_CLICKED";
-		public var showOuterEdges : Boolean = true;
 		public var showInterConnections : Boolean = false;
 		public var lastClickedNode : Node;
 		private var _layoutMode : String;
+		public var nodeLabeler : *;
 
 		/**		 *@Constructor		 */
 		public function RelationBrowser() {
@@ -58,12 +57,28 @@
 		}
 
 		protected function initLayout() : void {
-			visibilityOperator = new VisibilityFilter("visibleNodes", [], depth);
+			visibilityOperator = new VisibilityFilter(VISIBLE_NODES, [], depth);
 			operators.add(visibilityOperator);
+
 			detailLayout = new RadialLayout(sortBy);
 			operators.add(detailLayout);
+
 			overviewLayout = new RandomLayout();
 			operators.add(overviewLayout);
+
+			nodeLabeler = createNodeLabeler();
+			operators.add(nodeLabeler);
+		}
+
+		protected function createNodeLabeler() : NodeLabeler {
+			var tf : TextFormat = new TextFormat();
+			tf.align = TextFormatAlign.CENTER;
+			tf.font = "Arial";
+			tf.size = 11;
+			tf.bold = true;
+			tf.color = 0x333333;
+			var l : NodeLabeler = new NodeLabeler("data.label", tf);
+			return l;
 		}
 
 		public var _nodeDefaults : Object;
@@ -208,11 +223,11 @@
 			t = Transitioner.instance(t);
 		}
 
-		public function addNode(o : NodeData, icon : Class = null) : Node {
+		public function addNode(o : NodeData) : Node {
 			var n : Node = getNodeByID(o.id);
 			if (n == null) {
 				// no node yet for ID: create node
-				n = nodesByID[o.id] = createNode(o, icon);
+				n = nodesByID[o.id] = createNode(o);
 				data.nodes.applyDefaults(n);
 				data.addNode(n);
 			} else {
@@ -222,8 +237,8 @@
 			return n;
 		}
 
-		protected function createNode(data : NodeData, icon : Class = null) : Node {
-			return new Node(data, icon);
+		protected function createNode(data : NodeData) : Node {
+			return new Node(data);
 		}
 
 		public function getNodeByID(id : String) : Node {
@@ -277,8 +292,7 @@
 
 		override public function set data(data : Data) : void {
 			super.data = data;
-			visibleNodes = data.addGroup("visibleNodes");
-			visibleEdges = data.addGroup("visibleEdges");
+			visibleNodes = data.addGroup(VISIBLE_NODES);
 			initControls();
 			initLayout();
 		}

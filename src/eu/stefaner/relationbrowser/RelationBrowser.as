@@ -8,6 +8,7 @@
 
 	import flare.animate.TransitionEvent;
 	import flare.animate.Transitioner;
+	import flare.display.TextSprite;
 	import flare.vis.Visualization;
 	import flare.vis.controls.ClickControl;
 	import flare.vis.controls.HoverControl;
@@ -16,6 +17,7 @@
 	import flare.vis.data.EdgeSprite;
 	import flare.vis.events.SelectionEvent;
 	import flare.vis.operator.Operator;
+	import flare.vis.operator.label.Labeler;
 	import flare.vis.operator.layout.Layout;
 	import flare.vis.operator.layout.RandomLayout;
 
@@ -38,7 +40,7 @@
 		public var detailLayout : Layout;
 		public var overviewLayout : Layout;
 		public var visibilityOperator : VisibilityFilter;
-		protected var transitioner : Transitioner = new Transitioner(1);
+		public var transitioner : Transitioner = new Transitioner(1);
 		protected var nodesByID : Dictionary = new Dictionary();
 		protected var visibleNodes : DataList;
 		protected var visibleEdges : DataList;
@@ -77,6 +79,7 @@
 			tf.size = 11;
 			tf.bold = true;
 			tf.color = 0x333333;
+
 			var l : NodeLabeler = new NodeLabeler("data.label", tf);
 			return l;
 		}
@@ -175,7 +178,9 @@
 				layoutMode = OVERVIEW_LAYOUT;
 			} else {
 				layoutMode = DETAIL_LAYOUT;
+				addChild(selectedNode);
 			}
+
 			preUpdate(transitioner);
 			update(transitioner);
 			postUpdate(transitioner);
@@ -221,6 +226,10 @@
 
 		protected function postUpdate(t : Transitioner = null) : void {
 			t = Transitioner.instance(t);
+		}
+
+		public function getOrCreateNodeById(id : String) : Node {
+			return getNodeByID(id) || addNode(new NodeData(id));
 		}
 
 		public function addNode(o : NodeData) : Node {
@@ -297,7 +306,7 @@
 			initLayout();
 		}
 
-		private var _sortBy : Array;
+		private var _sortBy : Array = [];
 
 		public function get sortBy() : Array {
 			return _sortBy;

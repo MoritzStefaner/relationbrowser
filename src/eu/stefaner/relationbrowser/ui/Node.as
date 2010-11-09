@@ -1,27 +1,23 @@
 ﻿package eu.stefaner.relationbrowser.ui {
-	import flare.display.render.BackgroundRenderer;
-
-	import flash.text.TextFormatAlign;
-
-	import flare.display.TextSprite;
-
 	import eu.stefaner.relationbrowser.data.NodeData;
 
 	import flare.animate.TransitionEvent;
 	import flare.animate.Transitioner;
+	import flare.display.TextSprite;
 	import flare.util.Displays;
 	import flare.vis.data.EdgeSprite;
 	import flare.vis.data.NodeSprite;
 
 	import flash.events.Event;
+	import flash.text.TextFormatAlign;
 
 	public class Node extends NodeSprite {
 		public var t : Transitioner;
 		protected var _labelSprite : TextSprite;
 		private var runningRollOverTransition : Boolean;
 		private var doRollOutAfterTransitionEnd : Boolean;
-		//private static var _devNullTextSprite : TextSprite = new TextSprite();
 
+		// private static var _devNullTextSprite : TextSprite = new TextSprite();
 		/**		 *@Constructor		 */
 		public function Node(data : NodeData = null) {
 			super();
@@ -139,7 +135,7 @@
 		protected function initLabelSprite() : void {
 			_labelSprite.maxWidth = 100;
 			_labelSprite.textFormat.align = TextFormatAlign.CENTER;
-
+			
 			_labelSprite.backgroundFill = true;
 			_labelSprite.backgroundFillColor = 0xFF999999;
 			_labelSprite.backgroundBorder = true;

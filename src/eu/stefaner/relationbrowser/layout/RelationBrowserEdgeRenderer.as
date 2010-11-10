@@ -153,41 +153,78 @@ package eu.stefaner.relationbrowser.layout {
 				g.lineStyle();
 				g.beginFill(e.lineColor, e.lineAlpha);
 
-				var sw : Number = 3 * e.lineWidth;
-				var tw : Number = e.lineWidth;
+				// width at source
+				var sw : Number;
+				// width at target
+				var tw : Number;
+
+				// e.props.directionBalance = 0 -> fully expressed at source
+				// e.props.directionBalance = 0.5 -> balanced
+				// e.props.directionBalance = 1 -> fully expressed at target
+				if (e.props.directionBalance != null) {
+					sw = 2 * (1 - e.props.directionBalance) * e.lineWidth;
+					tw = 2 * e.props.directionBalance * e.lineWidth;
+				} else {
+					sw = 1.5 * e.lineWidth;
+					tw = .5 * e.lineWidth;
+				}
 
 				if (curved) {
 					var p : Point = new Point(ctrls[0] - x1, ctrls[1] - y1);
 					p.normalize(1);
 					var sourceNormal : Point = new Point(1 / p.x, -p.y);
 					sourceNormal.normalize(1);
-					if (p.length < new Point(p.x + sourceNormal.x, p.x + sourceNormal.y).length) {
+
+					if (p.length > new Point(p.x + sourceNormal.x, p.x + sourceNormal.y).length) {
 						sourceNormal.x *= -1;
 						sourceNormal.y *= -1;
 					}
+
 					p = new Point(dx, dy);
 					p.normalize(1);
 					var midNormal : Point = new Point(1 / p.x, -p.y);
 					midNormal.normalize(1);
-					if (p.length < new Point(p.x + midNormal.x, p.x + midNormal.y).length) {
-						midNormal.x *= -1;
-						midNormal.y *= -1;
-					}
-					
+
 					p = new Point(ctrls[0] - x2, ctrls[1] - y2);
 					p.normalize(1);
 					var targetNormal : Point = new Point(1 / p.x, -p.y);
 					targetNormal.normalize(1);
-					if (p.length < new Point(p.x + targetNormal.x, p.x + targetNormal.y).length) {
+
+					if (p.length > new Point(p.x + targetNormal.x, p.x + targetNormal.y).length) {
 						targetNormal.x *= -1;
 						targetNormal.y *= -1;
 					}
+
+					var p1 : Point = sourceNormal.add(targetNormal);
+					var p2 : Point = sourceNormal.add(new Point(-targetNormal.x, -targetNormal.y));
+					if (p1.length < p2.length) {
+						targetNormal.x *= -1;
+						targetNormal.y *= -1;
+					}
+
+					var p1 : Point = sourceNormal.add(midNormal);
+					var p2 : Point = sourceNormal.add(new Point(-midNormal.x, -midNormal.y));
+					if (p1.length < p2.length) {
+						midNormal.x *= -1;
+						midNormal.y *= -1;
+					}
+
 					g.moveTo(x1 - sw * sourceNormal.x, y1 - sw * sourceNormal.y);
 					g.lineTo(x1 + sw * sourceNormal.x, y1 + sw * sourceNormal.y);
 					g.curveTo(ctrls[0] + midNormal.x * (sw + tw) * .5, ctrls[1] + midNormal.y * (sw + tw) * .5, x2 + tw * targetNormal.x, y2 + tw * targetNormal.y);
 					g.lineTo(x2 - tw * targetNormal.x, y2 - tw * targetNormal.y);
 					g.curveTo(ctrls[0] - midNormal.x * (sw + tw) * .5, ctrls[1] - midNormal.y * (sw + tw) * .5, x1 - sw * sourceNormal.x, y1 - sw * sourceNormal.y);
 					g.endFill();
+
+					/*
+					// debug
+					g.moveTo(x1 - sw * sourceNormal.x, y1 - sw * sourceNormal.y);
+					g.lineTo(x1 + sw * sourceNormal.x, y1 + sw * sourceNormal.y);
+					g.lineTo(x2 + tw * targetNormal.x, y2 + tw * targetNormal.y);
+					g.lineTo(x2 - tw * targetNormal.x, y2 - tw * targetNormal.y);
+					g.endFill();
+					 * 
+					 */
 				} else {
 					var normal : Point = new Point(1 / dy, -dx);
 					normal.normalize(1);

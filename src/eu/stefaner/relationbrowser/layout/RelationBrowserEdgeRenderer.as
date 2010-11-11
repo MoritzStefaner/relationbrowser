@@ -1,6 +1,7 @@
 package eu.stefaner.relationbrowser.layout {
 	import eu.stefaner.relationbrowser.ui.Node;
 
+	import flare.util.Shapes;
 	import flare.vis.data.DataSprite;
 	import flare.vis.data.EdgeSprite;
 	import flare.vis.data.NodeSprite;
@@ -10,10 +11,14 @@ package eu.stefaner.relationbrowser.layout {
 	import flash.display.Graphics;
 	import flash.geom.Point;
 
-	/**	 * @author mo	 */
+	/**
+	 * @author mo
+	 */
 	public class RelationBrowserEdgeRenderer extends EdgeRenderer {
 		private static const ROOT3 : Number = Math.sqrt(3);
 		public static var CURVE_ALL_EDGES : Boolean;
+		public static var CURVE_SCALE : Number = 1.1;
+		public static var CURVE_SCALE_RADIUS : Number = 800;
 
 		public function RelationBrowserEdgeRenderer() {
 		}
@@ -40,8 +45,19 @@ package eu.stefaner.relationbrowser.layout {
 			var t : NodeSprite = e.target;
 			var g : Graphics = e.graphics;
 			var ctrls : Array = e.points as Array;
+
 			var x1 : Number = e.x1, y1 : Number = e.y1;
 			var x2 : Number = e.x2, y2 : Number = e.y2;
+
+			if (e.source.shape = Shapes.BLOCK) {
+				e.x1 = x1 = e.source.u + e.source.w * .5;
+				e.y1 = y1 = e.source.v + e.source.h * .5;
+			}
+			if (e.target.shape = Shapes.BLOCK) {
+				e.x2 = x2 = e.target.u + e.target.w * .5;
+				e.y2 = y2 = e.target.v + e.target.h * .5;
+			}
+
 			var xL : Number = ctrls == null ? x1 : ctrls[ctrls.length - 2];
 			var yL : Number = ctrls == null ? y1 : ctrls[ctrls.length - 1];
 			var dx : Number, dy : Number, dd : Number;
@@ -134,13 +150,14 @@ package eu.stefaner.relationbrowser.layout {
 			if (curved) {
 				var diffX : Number = x2 - x1;
 				var diffY : Number = y2 - y1;
-				var scaleFactor : Number = 1 + (Math.sqrt(diffX * diffX + diffY * diffY) / 800);
-				ctrls = [scaleFactor * (x1 + diffX * .5), scaleFactor * (y1 + diffY * .5)];
+				var scaleFactor : Number = 1 + CURVE_SCALE * (Math.sqrt(diffX * diffX + diffY * diffY) / CURVE_SCALE_RADIUS);
+				ctrls = [e.origin.x + scaleFactor * (x1 + diffX * .5 - e.origin.x), e.origin.y + scaleFactor * (y1 + diffY * .5 - e.origin.y)];
 			} else {
 				ctrls = null;
 			}
+
 			if (e.props.isBidirectional) {
-				// draw only one half 
+				// draw only one half
 				x1 = x1 + (x2 - x1) * .5;
 				y1 = y1 + (y2 - y1) * .5;
 			}
@@ -161,6 +178,7 @@ package eu.stefaner.relationbrowser.layout {
 				// e.props.directionBalance = 0 -> fully expressed at source
 				// e.props.directionBalance = 0.5 -> balanced
 				// e.props.directionBalance = 1 -> fully expressed at target
+
 				if (e.props.directionBalance != null) {
 					sw = 2 * (1 - e.props.directionBalance) * e.lineWidth;
 					tw = 2 * e.props.directionBalance * e.lineWidth;
@@ -170,44 +188,9 @@ package eu.stefaner.relationbrowser.layout {
 				}
 
 				if (curved) {
-					var p : Point = new Point(ctrls[0] - x1, ctrls[1] - y1);
-					p.normalize(1);
-					var sourceNormal : Point = new Point(1 / p.x, -p.y);
-					sourceNormal.normalize(1);
-
-					if (p.length > new Point(p.x + sourceNormal.x, p.x + sourceNormal.y).length) {
-						sourceNormal.x *= -1;
-						sourceNormal.y *= -1;
-					}
-
-					p = new Point(dx, dy);
-					p.normalize(1);
-					var midNormal : Point = new Point(1 / p.x, -p.y);
-					midNormal.normalize(1);
-
-					p = new Point(ctrls[0] - x2, ctrls[1] - y2);
-					p.normalize(1);
-					var targetNormal : Point = new Point(1 / p.x, -p.y);
-					targetNormal.normalize(1);
-
-					if (p.length > new Point(p.x + targetNormal.x, p.x + targetNormal.y).length) {
-						targetNormal.x *= -1;
-						targetNormal.y *= -1;
-					}
-
-					var p1 : Point = sourceNormal.add(targetNormal);
-					var p2 : Point = sourceNormal.add(new Point(-targetNormal.x, -targetNormal.y));
-					if (p1.length < p2.length) {
-						targetNormal.x *= -1;
-						targetNormal.y *= -1;
-					}
-
-					var p1 : Point = sourceNormal.add(midNormal);
-					var p2 : Point = sourceNormal.add(new Point(-midNormal.x, -midNormal.y));
-					if (p1.length < p2.length) {
-						midNormal.x *= -1;
-						midNormal.y *= -1;
-					}
+					var sourceNormal : Point = getNormal(ctrls[0] - x1, ctrls[1] - y1, new Point(x1, y1));
+					var midNormal : Point = getNormal(dx, dy, new Point(ctrls[0], ctrls[1]));
+					var targetNormal : Point = getNormal(ctrls[0] - x2, ctrls[1] - y2, new Point(x2, y2));
 
 					g.moveTo(x1 - sw * sourceNormal.x, y1 - sw * sourceNormal.y);
 					g.lineTo(x1 + sw * sourceNormal.x, y1 + sw * sourceNormal.y);
@@ -226,8 +209,8 @@ package eu.stefaner.relationbrowser.layout {
 					 * 
 					 */
 				} else {
-					var normal : Point = new Point(1 / dy, -dx);
-					normal.normalize(1);
+					var normal : Point = getNormal(dx, dy);
+
 					g.moveTo(x1 - sw * normal.x, y1 - sw * normal.y);
 					g.lineTo(x1 + sw * normal.x, y1 + sw * normal.y);
 					g.lineTo(x2 + tw * normal.x, y2 + tw * normal.y);
@@ -268,5 +251,18 @@ package eu.stefaner.relationbrowser.layout {
 				}
 			}
 		}
+
+		private function getNormal(dx : Number, dy : Number, ref : Point = null) : Point {
+			var normal : Point = new Point(dy, -dx);
+			normal.normalize(1);
+			if (ref) {
+				if (new Point(ref.x + normal.x, ref.y + normal.y).length < new Point(ref.x - normal.x, ref.y - normal.y).length) {
+					normal.x *= -1;
+					normal.y *= -1;
+				}
+			}
+
+			return normal;
+		}
 	}
-}
+}

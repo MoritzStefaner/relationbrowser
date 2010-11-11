@@ -8,7 +8,6 @@
 
 	import flare.animate.TransitionEvent;
 	import flare.animate.Transitioner;
-	import flare.display.TextSprite;
 	import flare.vis.Visualization;
 	import flare.vis.controls.ClickControl;
 	import flare.vis.controls.HoverControl;
@@ -17,7 +16,6 @@
 	import flare.vis.data.EdgeSprite;
 	import flare.vis.events.SelectionEvent;
 	import flare.vis.operator.Operator;
-	import flare.vis.operator.label.Labeler;
 	import flare.vis.operator.layout.Layout;
 	import flare.vis.operator.layout.RandomLayout;
 

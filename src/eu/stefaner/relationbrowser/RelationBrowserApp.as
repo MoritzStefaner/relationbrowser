@@ -138,7 +138,6 @@
 			relationBrowser.addOperators(getOperators());
 			relationBrowser.nodeDefaults = getNodeDefaults();
 			relationBrowser.edgeDefaults = getEdgeDefaults();
-			relationBrowser.sortBy = ["props.cluster"];
 			addChild(relationBrowser);
 			relationBrowser.addEventListener(RelationBrowser.NODE_CLICKED, onNodeClicked);
 			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTED, onNodeSelected);
@@ -147,11 +146,10 @@
 
 		protected function getNodeDefaults() : Object {
 			var n : Object = {};
-			n.lineWidth = 2;
+			n.lineWidth = 1;
 			n.lineColor = 0x33000000;
 			n.fillColor = 0x22000000;
 			n.shape = Shapes.CIRCLE;
-			n.w = n.h = 80;
 			n.size = 8;
 			n.edgeRadius = 55;
 			return n;

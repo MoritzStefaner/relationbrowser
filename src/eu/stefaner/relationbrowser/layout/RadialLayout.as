@@ -7,7 +7,7 @@
 
 	/**	 * @author mo	 */
 	public class RadialLayout extends Layout {
-		public var sortBy : Array =[];
+		public var sortBy : Array;
 
 		public function RadialLayout(sortBy : Array = null) {
 			this.sortBy = sortBy ? sortBy : [];
@@ -32,7 +32,7 @@
 					innerRing.add(n);
 				}
 			});
-			if(sortBy.length) innerRing.sortBy(sortBy);
+			innerRing.sortBy(sortBy);
 
 			var angleInc : Number = (Math.PI * 2.0) / innerRing.length;
 			var counter : uint = innerRing.length;

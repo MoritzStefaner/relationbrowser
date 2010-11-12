@@ -49,11 +49,11 @@ package eu.stefaner.relationbrowser.layout {
 			var x1 : Number = e.x1, y1 : Number = e.y1;
 			var x2 : Number = e.x2, y2 : Number = e.y2;
 
-			if (e.source.shape = Shapes.BLOCK) {
+			if (e.source.shape == Shapes.BLOCK) {
 				e.x1 = x1 = e.source.u + e.source.w * .5;
 				e.y1 = y1 = e.source.v + e.source.h * .5;
 			}
-			if (e.target.shape = Shapes.BLOCK) {
+			if (e.target.shape == Shapes.BLOCK) {
 				e.x2 = x2 = e.target.u + e.target.w * .5;
 				e.y2 = y2 = e.target.v + e.target.h * .5;
 			}

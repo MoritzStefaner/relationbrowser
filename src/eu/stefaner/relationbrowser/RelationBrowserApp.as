@@ -16,10 +16,11 @@
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.external.ExternalInterface;
-	import flash.geom.Point;
 	import flash.geom.Rectangle;
 
-	/**	 * @author mo	 */
+	/**
+	 * @author mo
+	 */
 	public class RelationBrowserApp extends Sprite {
 		public var dataURL : String;
 		public var configURL : String;
@@ -39,25 +40,6 @@
 			initDisplay();
 			loadData();
 		}
-
-		protected function initStage() : void {
-			stage.scaleMode = StageScaleMode.NO_SCALE;
-			stage.align = StageAlign.TOP_LEFT;
-			stage.addEventListener(Event.RESIZE, onResize);
-			try {
-				// stage.displayState = StageDisplayState.FULL_SCREEN;
-			} catch (e : Error) {
-			}
-		};
-
-		protected function initExternalInterface() : void {
-			if (ExternalInterface.available) {
-				try {
-					ExternalInterface.addCallback("selectNodeByID", selectNodeByID);
-				} catch(e : Error) {
-				}
-			}
-		};
 
 		protected function initSWFAddress() : void {
 			SWFAddress.addEventListener(SWFAddressEvent.EXTERNAL_CHANGE, onURLparamChanged);
@@ -91,26 +73,29 @@
 			}
 		}
 
-		protected function initDisplay() : void {
-			Logger.info("RelationBrowserApp: initDisplay");
-			relationBrowser = createRelationBrowser();
-
-			relationBrowser.addOperators(getOperators());
-			relationBrowser.nodeDefaults = getNodeDefaults();
-			relationBrowser.edgeDefaults = getEdgeDefaults();
-			addChild(relationBrowser);
-
-			relationBrowser.addEventListener(RelationBrowser.NODE_CLICKED, onNodeClicked);
-			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTED, onNodeSelected);
-			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTION_FINISHED, onNodeSelectionFinished);
-
-			onResize();
+		protected function initStage() : void {
+			stage.scaleMode = StageScaleMode.NO_SCALE;
+			stage.align = StageAlign.TOP_LEFT;
+			stage.addEventListener(Event.RESIZE, onResize);
+			try {
+				// stage.displayState = StageDisplayState.FULL_SCREEN;
+			} catch (e : Error) {
+			}
 		};
 
 		protected function onResize(event : Event = null) : void {
 			relationBrowser.bounds = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
 			relationBrowser.x = stage.stageWidth * .5;
 			relationBrowser.y = stage.stageHeight * .5;
+		};
+
+		protected function initExternalInterface() : void {
+			if (ExternalInterface.available) {
+				try {
+					ExternalInterface.addCallback("selectNodeByID", selectNodeByID);
+				} catch(e : Error) {
+				}
+			}
 		};
 
 		// for external JS calls
@@ -131,6 +116,7 @@
 				}
 			}
 			relationBrowser.visible = true;
+			addChild(relationBrowser);
 			relationBrowser.nodeDefaults = getNodeDefaults();
 			relationBrowser.edgeDefaults = getEdgeDefaults();
 			onURLparamChanged();
@@ -148,16 +134,29 @@
 			Logger.info("loadGraphML");
 		};
 
+		protected function initDisplay() : void {
+			Logger.info("RelationBrowserApp: initDisplay");
+			relationBrowser = createRelationBrowser();
+			onResize();
+			relationBrowser.addOperators(getOperators());
+			relationBrowser.nodeDefaults = getNodeDefaults();
+			relationBrowser.edgeDefaults = getEdgeDefaults();
+			relationBrowser.sortBy = ["props.cluster"];
+			addChild(relationBrowser);
+			relationBrowser.addEventListener(RelationBrowser.NODE_CLICKED, onNodeClicked);
+			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTED, onNodeSelected);
+			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTION_FINISHED, onNodeSelectionFinished);
+		};
+
 		protected function getNodeDefaults() : Object {
 			var n : Object = {};
-			n.lineWidth = 1;
-
+			n.lineWidth = 2;
 			n.lineColor = 0x33000000;
 			n.fillColor = 0x22000000;
 			n.shape = Shapes.CIRCLE;
+			n.w = n.h = 80;
 			n.size = 8;
 			n.edgeRadius = 55;
-
 			return n;
 		};
 
@@ -209,4 +208,4 @@
 			return new RelationBrowser();
 		}
 	}
-}
+}

@@ -1,9 +1,9 @@
 package eu.stefaner.relationbrowser.layout {
+	import eu.stefaner.relationbrowser.ui.Edge;
 	import eu.stefaner.relationbrowser.ui.Node;
 
 	import flare.util.Shapes;
 	import flare.vis.data.DataSprite;
-	import flare.vis.data.EdgeSprite;
 	import flare.vis.data.NodeSprite;
 	import flare.vis.data.render.ArrowType;
 	import flare.vis.data.render.EdgeRenderer;
@@ -36,7 +36,7 @@ package eu.stefaner.relationbrowser.layout {
 
 		/** @inheritDoc */
 		override public function render(d : DataSprite) : void {
-			var e : EdgeSprite = d as EdgeSprite;
+			var e : Edge = d as Edge;
 			if (e == null) {
 				return;
 			}
@@ -62,7 +62,8 @@ package eu.stefaner.relationbrowser.layout {
 			var yL : Number = ctrls == null ? y1 : ctrls[ctrls.length - 1];
 			var dx : Number, dy : Number, dd : Number;
 			// cuvred lines for outer edges: should be configurable!
-			var curved : Boolean = CURVE_ALL_EDGES || t.props.distance == 2 || s.props.distance == 2;
+			//var curved : Boolean = CURVE_ALL_EDGES || t.props.distance == 2 || s.props.distance == 2;
+			var curved : Boolean = CURVE_ALL_EDGES || e.curved;
 			// modify end points as needed to accomodate arrow
 			if (e.arrowType != ArrowType.NONE && e.directed) {
 				// determine arrow head size

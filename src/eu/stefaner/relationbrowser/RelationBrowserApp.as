@@ -36,13 +36,14 @@
 			Logger.info("startUp");
 			initStage();
 			initExternalInterface();
-			initSWFAddress();
+			//initSWFAddress();
 			initDisplay();
 			loadData();
 		}
 
 		protected function initSWFAddress() : void {
 			SWFAddress.addEventListener(SWFAddressEvent.EXTERNAL_CHANGE, onURLparamChanged);
+			SWFAddress.addEventListener(SWFAddressEvent.INIT, onURLparamChanged);
 			baseTitle = SWFAddress.getTitle();
 		}
 
@@ -119,7 +120,7 @@
 			addChild(relationBrowser);
 			relationBrowser.nodeDefaults = getNodeDefaults();
 			relationBrowser.edgeDefaults = getEdgeDefaults();
-			onURLparamChanged();
+			initSWFAddress();
 		};
 
 		protected function loadData() : void {

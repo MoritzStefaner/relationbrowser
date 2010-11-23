@@ -32,7 +32,7 @@
 					innerRing.add(n);
 				}
 			});
-			innerRing.sortBy(sortBy);
+			//innerRing.sortBy(sortBy);
 
 			var angleInc : Number = (Math.PI * 2.0) / innerRing.length;
 			var counter : uint = innerRing.length;

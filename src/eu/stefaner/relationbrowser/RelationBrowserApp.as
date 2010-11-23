@@ -116,7 +116,7 @@
 				}
 			}
 			relationBrowser.visible = true;
-			addChild(relationBrowser);
+			//addChild(relationBrowser);
 			relationBrowser.nodeDefaults = getNodeDefaults();
 			relationBrowser.edgeDefaults = getEdgeDefaults();
 			onURLparamChanged();

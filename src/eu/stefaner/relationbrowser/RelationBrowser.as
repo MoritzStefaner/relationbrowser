@@ -191,13 +191,15 @@
 			switch(m) {
 				case OVERVIEW_LAYOUT:
 					detailLayout.enabled = false;
-					visibilityOperator.enabled = false;
+					visibilityOperator.mode = VisibilityFilter.MODE_SHOW_ALL;
+					//visibilityOperator.enabled = false;
 					overviewLayout.enabled = true;
 					break;
 				case DETAIL_LAYOUT:
 					overviewLayout.enabled = false;
 					detailLayout.enabled = true;
-					visibilityOperator.enabled = true;
+					visibilityOperator.mode = VisibilityFilter.MODE_SHOW_NEIGHBORHOOD;
+					//visibilityOperator.enabled = true;
 					detailLayout.layoutRoot = selectedNode;
 					visibilityOperator.focusNodes = [selectedNode];
 					break;

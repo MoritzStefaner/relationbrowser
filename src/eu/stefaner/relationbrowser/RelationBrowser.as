@@ -167,7 +167,10 @@
 
 		public function updateSelection(t : *= null) : Transitioner {
 			Logger.info("updateSelection  " + selectedNode);
+			
 			transitioner = Transitioner.instance(t);
+			if (!data || !data.length) return transitioner;
+			
 			if (!transitioner.hasEventListener(TransitionEvent.END)) {
 				transitioner.addEventListener(TransitionEvent.END, onTransitionEnd, false, 0, true);
 			}

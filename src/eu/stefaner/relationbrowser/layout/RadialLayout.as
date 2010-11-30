@@ -7,7 +7,7 @@
 
 	/**	 * @author mo	 */
 	public class RadialLayout extends Layout {
-		public var sortBy : Array =[];
+		public var sortBy : Array;
 
 		public function RadialLayout(sortBy : Array = null) {
 			this.sortBy = sortBy ? sortBy : [];
@@ -15,11 +15,10 @@
 		}
 
 		protected override function layout() : void {
-			// autoAnchor();
+			autoAnchor();
 			var selectedNode : Node = (layoutRoot as Node);
 
 			var r : Number = .5 * Math.max(visualization.bounds.width, visualization.bounds.height);
-
 			visualization.data.nodes.setProperties({radius:r}, _t);
 			_t.$(selectedNode).radius = .001;
 
@@ -32,7 +31,10 @@
 					innerRing.add(n);
 				}
 			});
-			if(sortBy.length) innerRing.sortBy(sortBy);
+			try {
+				innerRing.sortBy(sortBy);
+			} catch(error : Error) {
+			}
 
 			var angleInc : Number = (Math.PI * 2.0) / innerRing.length;
 			var counter : uint = innerRing.length;
@@ -42,7 +44,7 @@
 				doZigZag = 1;
 			}
 			// TODO: express as fraction of layoutBounds.width
-			var innerRadius : Number = 240;
+			var innerRadius : Number = layoutBounds.width * .33;
 			var angle : Number;
 			for each (n in innerRing) {
 				_t.$(n).radius = innerRadius + doZigZag * ((counter % 2) * 2 - 1) * innerRadius / 6;

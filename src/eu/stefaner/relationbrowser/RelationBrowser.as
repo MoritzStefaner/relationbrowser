@@ -14,6 +14,7 @@
 	import flare.vis.data.Data;
 	import flare.vis.data.DataList;
 	import flare.vis.data.EdgeSprite;
+	import flare.vis.data.Tree;
 	import flare.vis.events.SelectionEvent;
 	import flare.vis.operator.Operator;
 	import flare.vis.operator.layout.Layout;
@@ -27,8 +28,8 @@
 	import flash.utils.Dictionary;
 
 	public class RelationBrowser extends Visualization {
-		public static const OVERVIEW_LAYOUT : String = "OVERVIEW_LAYOUT";
-		public static const DETAIL_LAYOUT : String = "DETAIL_LAYOUT";
+		public static const OVERVIEW_LAYOUT : int = 0;
+		public static const DETAIL_LAYOUT : int = 1;
 		public static const VISIBLE_NODES : String = "VISIBLE_NODES";
 		public static const NODE_SELECTED : String = "NODE_SELECTED";
 		public static const NODE_SELECTION_FINISHED : String = "NODE_SELECTION_FINISHED";
@@ -38,13 +39,13 @@
 		public var detailLayout : Layout;
 		public var overviewLayout : Layout;
 		public var visibilityOperator : VisibilityFilter;
-		public var transitioner : Transitioner = new Transitioner(1);
+		protected var transitioner : Transitioner = new Transitioner(1);
 		protected var nodesByID : Dictionary = new Dictionary();
 		protected var visibleNodes : DataList;
 		protected var visibleEdges : DataList;
 		public var showInterConnections : Boolean = false;
 		public var lastClickedNode : Node;
-		private var _layoutMode : String;
+		private var _layoutMode : int;
 		public var nodeLabeler : *;
 
 		/**		 *@Constructor		 */
@@ -57,6 +58,8 @@
 		}
 
 		protected function initLayout() : void {
+			operators.clear();
+
 			visibilityOperator = new VisibilityFilter(VISIBLE_NODES, [], depth);
 			operators.add(visibilityOperator);
 
@@ -77,7 +80,6 @@
 			tf.size = 11;
 			tf.bold = true;
 			tf.color = 0x333333;
-
 			var l : NodeLabeler = new NodeLabeler("data.label", tf);
 			return l;
 		}
@@ -107,6 +109,7 @@
 		}
 
 		protected function initControls() : void {
+			controls.clear();
 			controls.add(new ClickControl(Node, 1, onNodeClick));
 			controls.add(new HoverControl(Node, HoverControl.MOVE_AND_RETURN, onNodeRollOver, onNodeRollOut));
 		}
@@ -168,7 +171,10 @@
 
 		public function updateSelection(t : *= null) : Transitioner {
 			Logger.info("updateSelection  " + selectedNode);
+
 			transitioner = Transitioner.instance(t);
+			if (!data || !data.length) return transitioner;
+
 			if (!transitioner.hasEventListener(TransitionEvent.END)) {
 				transitioner.addEventListener(TransitionEvent.END, onTransitionEnd, false, 0, true);
 			}
@@ -176,9 +182,7 @@
 				layoutMode = OVERVIEW_LAYOUT;
 			} else {
 				layoutMode = DETAIL_LAYOUT;
-				addChild(selectedNode);
 			}
-
 			preUpdate(transitioner);
 			update(transitioner);
 			postUpdate(transitioner);
@@ -186,17 +190,19 @@
 			return transitioner;
 		}
 
-		public function set layoutMode(m : String) : void {
+		public function set layoutMode(m : int) : void {
 			_layoutMode = m;
 			switch(m) {
 				case OVERVIEW_LAYOUT:
 					detailLayout.enabled = false;
-					visibilityOperator.enabled = false;
+					visibilityOperator.mode = VisibilityFilter.MODE_SHOW_ALL;
+					visibilityOperator.enabled = true;
 					overviewLayout.enabled = true;
 					break;
 				case DETAIL_LAYOUT:
 					overviewLayout.enabled = false;
 					detailLayout.enabled = true;
+					visibilityOperator.mode = VisibilityFilter.MODE_SHOW_NEIGHBORHOOD;
 					visibilityOperator.enabled = true;
 					detailLayout.layoutRoot = selectedNode;
 					visibilityOperator.focusNodes = [selectedNode];
@@ -204,15 +210,19 @@
 			}
 		}
 
-		public function get layoutMode() : String {
+		public function get layoutMode() : int {
 			return _layoutMode;
 		}
 
-		private function onTransitionEnd(event : TransitionEvent) : void {
+		protected function onTransitionEnd(event : TransitionEvent) : void {
 			dispatchEvent(new Event(NODE_SELECTION_FINISHED));
 		}
 
 		protected function preUpdate(t : Transitioner = null) : void {
+			applyDefaults(t);
+		}
+
+		public function applyDefaults(t : Transitioner) : void {
 			t = Transitioner.instance(t);
 			if (nodeDefaults) {
 				data.nodes.setProperties(nodeDefaults, t);
@@ -224,10 +234,6 @@
 
 		protected function postUpdate(t : Transitioner = null) : void {
 			t = Transitioner.instance(t);
-		}
-
-		public function getOrCreateNodeById(id : String) : Node {
-			return getNodeByID(id) || addNode(new NodeData(id));
 		}
 
 		public function addNode(o : NodeData) : Node {
@@ -294,7 +300,7 @@
 		}
 
 		override public function get data() : Data {
-			return super.data ? super.data : data = new Data();
+			return super.data ? super.data : data = new Tree();
 		}
 
 		override public function set data(data : Data) : void {
@@ -304,7 +310,7 @@
 			initLayout();
 		}
 
-		private var _sortBy : Array = [];
+		private var _sortBy : Array;
 
 		public function get sortBy() : Array {
 			return _sortBy;

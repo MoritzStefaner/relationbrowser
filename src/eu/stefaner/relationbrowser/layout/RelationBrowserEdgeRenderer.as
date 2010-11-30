@@ -1,8 +1,9 @@
 package eu.stefaner.relationbrowser.layout {
+	import eu.stefaner.relationbrowser.ui.Edge;
 	import eu.stefaner.relationbrowser.ui.Node;
 
+	import flare.util.Shapes;
 	import flare.vis.data.DataSprite;
-	import flare.vis.data.EdgeSprite;
 	import flare.vis.data.NodeSprite;
 	import flare.vis.data.render.ArrowType;
 	import flare.vis.data.render.EdgeRenderer;
@@ -16,6 +17,8 @@ package eu.stefaner.relationbrowser.layout {
 	public class RelationBrowserEdgeRenderer extends EdgeRenderer {
 		private static const ROOT3 : Number = Math.sqrt(3);
 		public static var CURVE_ALL_EDGES : Boolean;
+		public static var CURVE_SCALE : Number = 1.1;
+		public static var CURVE_SCALE_RADIUS : Number = 800;
 
 		public function RelationBrowserEdgeRenderer() {
 		}
@@ -33,7 +36,7 @@ package eu.stefaner.relationbrowser.layout {
 
 		/** @inheritDoc */
 		override public function render(d : DataSprite) : void {
-			var e : EdgeSprite = d as EdgeSprite;
+			var e : Edge = d as Edge;
 			if (e == null) {
 				return;
 			}
@@ -42,13 +45,25 @@ package eu.stefaner.relationbrowser.layout {
 			var t : NodeSprite = e.target;
 			var g : Graphics = e.graphics;
 			var ctrls : Array = e.points as Array;
+
 			var x1 : Number = e.x1, y1 : Number = e.y1;
 			var x2 : Number = e.x2, y2 : Number = e.y2;
+
+			if (e.source.shape == Shapes.BLOCK) {
+				e.x1 = x1 = e.source.u + e.source.w * .5;
+				e.y1 = y1 = e.source.v + e.source.h * .5;
+			}
+			if (e.target.shape == Shapes.BLOCK) {
+				e.x2 = x2 = e.target.u + e.target.w * .5;
+				e.y2 = y2 = e.target.v + e.target.h * .5;
+			}
+
 			var xL : Number = ctrls == null ? x1 : ctrls[ctrls.length - 2];
 			var yL : Number = ctrls == null ? y1 : ctrls[ctrls.length - 1];
 			var dx : Number, dy : Number, dd : Number;
 			// cuvred lines for outer edges: should be configurable!
-			var curved : Boolean = CURVE_ALL_EDGES || t.props.distance == 2 || s.props.distance == 2;
+			//var curved : Boolean = CURVE_ALL_EDGES || t.props.distance == 2 || s.props.distance == 2;
+			var curved : Boolean = CURVE_ALL_EDGES || e.curved;
 			// modify end points as needed to accomodate arrow
 			if (e.arrowType != ArrowType.NONE && e.directed) {
 				// determine arrow head size
@@ -136,11 +151,12 @@ package eu.stefaner.relationbrowser.layout {
 			if (curved) {
 				var diffX : Number = x2 - x1;
 				var diffY : Number = y2 - y1;
-				var scaleFactor : Number = 1 + (Math.sqrt(diffX * diffX + diffY * diffY) / 800);
-				ctrls = [scaleFactor * (x1 + diffX * .5), scaleFactor * (y1 + diffY * .5)];
+				var scaleFactor : Number = 1 + CURVE_SCALE * (Math.sqrt(diffX * diffX + diffY * diffY) / CURVE_SCALE_RADIUS);
+				ctrls = [e.origin.x + scaleFactor * (x1 + diffX * .5 - e.origin.x), e.origin.y + scaleFactor * (y1 + diffY * .5 - e.origin.y)];
 			} else {
 				ctrls = null;
 			}
+
 			if (e.props.isBidirectional) {
 				// draw only one half
 				x1 = x1 + (x2 - x1) * .5;
@@ -163,7 +179,7 @@ package eu.stefaner.relationbrowser.layout {
 				// e.props.directionBalance = 0 -> fully expressed at source
 				// e.props.directionBalance = 0.5 -> balanced
 				// e.props.directionBalance = 1 -> fully expressed at target
-				
+
 				if (e.props.directionBalance != null) {
 					sw = 2 * (1 - e.props.directionBalance) * e.lineWidth;
 					tw = 2 * e.props.directionBalance * e.lineWidth;

@@ -1,17 +1,16 @@
 package eu.stefaner.relationbrowser {
-	import flare.display.TextSprite;
 	import flare.vis.data.Data;
-	import flare.vis.operator.label.Labeler;
+	import flare.vis.operator.label.RadialLabeler;
 
 	import flash.text.TextFormat;
 
 	/**
 	 * @author mo
 	 */
-	public class NodeLabeler extends Labeler {
-		public function NodeLabeler(source : * = null, format : TextFormat = null, policy : String = "layer", textMode : uint = 1, filter : * = null) {
+	public class NodeLabeler extends RadialLabeler {
+		public function NodeLabeler(source : * = null, format : TextFormat = null, policy : String = "layer", textMode : uint = 1, filter : * = null, rotate : Boolean = false) {
 			this.textMode = textMode;
-			super(source, Data.NODES, format, filter, policy);
+			super(source, rotate, format, filter, policy);
 			access = "labelSprite";
 		}
 	}

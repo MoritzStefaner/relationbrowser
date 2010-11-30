@@ -36,13 +36,14 @@
 			Logger.info("startUp");
 			initStage();
 			initExternalInterface();
-			initSWFAddress();
+			//initSWFAddress();
 			initDisplay();
 			loadData();
 		}
 
 		protected function initSWFAddress() : void {
 			SWFAddress.addEventListener(SWFAddressEvent.EXTERNAL_CHANGE, onURLparamChanged);
+			SWFAddress.addEventListener(SWFAddressEvent.INIT, onURLparamChanged);
 			baseTitle = SWFAddress.getTitle();
 		}
 
@@ -85,8 +86,8 @@
 
 		protected function onResize(event : Event = null) : void {
 			relationBrowser.bounds = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
-			relationBrowser.x = stage.stageWidth * .5;
-			relationBrowser.y = stage.stageHeight * .5;
+			relationBrowser.x = 0;
+			relationBrowser.y = 0;
 		};
 
 		protected function initExternalInterface() : void {
@@ -116,10 +117,10 @@
 				}
 			}
 			relationBrowser.visible = true;
-			addChild(relationBrowser);
+			//addChild(relationBrowser);
 			relationBrowser.nodeDefaults = getNodeDefaults();
 			relationBrowser.edgeDefaults = getEdgeDefaults();
-			onURLparamChanged();
+			initSWFAddress();
 		};
 
 		protected function loadData() : void {
@@ -137,12 +138,16 @@
 		protected function initDisplay() : void {
 			Logger.info("RelationBrowserApp: initDisplay");
 			relationBrowser = createRelationBrowser();
-			onResize();
+			
 			relationBrowser.addOperators(getOperators());
+			
 			relationBrowser.nodeDefaults = getNodeDefaults();
 			relationBrowser.edgeDefaults = getEdgeDefaults();
-			relationBrowser.sortBy = ["props.cluster"];
+			
+			//relationBrowser.sortBy = ["props.cluster"];
 			addChild(relationBrowser);
+			onResize();
+
 			relationBrowser.addEventListener(RelationBrowser.NODE_CLICKED, onNodeClicked);
 			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTED, onNodeSelected);
 			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTION_FINISHED, onNodeSelectionFinished);

@@ -39,7 +39,7 @@
 		public var detailLayout : Layout;
 		public var overviewLayout : Layout;
 		public var visibilityOperator : VisibilityFilter;
-		protected var transitioner : Transitioner = new Transitioner(1);
+		public var transitioner : Transitioner = new Transitioner(1);
 		protected var nodesByID : Dictionary = new Dictionary();
 		protected var visibleNodes : DataList;
 		protected var visibleEdges : DataList;
@@ -242,6 +242,8 @@
 				// no node yet for ID: create node
 				n = nodesByID[o.id] = createNode(o);
 				data.nodes.applyDefaults(n);
+				n.origin = (detailLayout as RadialLayout).layoutAnchor;
+				n.radius = .001;
 				data.addNode(n);
 			} else {
 				// existing node: set new data

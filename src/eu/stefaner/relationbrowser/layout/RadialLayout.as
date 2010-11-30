@@ -18,7 +18,8 @@
 			autoAnchor();
 			var selectedNode : Node = (layoutRoot as Node);
 
-			var r : Number = .5 * Math.max(visualization.bounds.width, visualization.bounds.height);
+			var r : Number = .5 * Math.max(layoutBounds.width, layoutBounds.height);
+			visualization.data.nodes.setProperties({origin:_anchor});
 			visualization.data.nodes.setProperties({radius:r}, _t);
 			_t.$(selectedNode).radius = .001;
 
@@ -31,6 +32,7 @@
 					innerRing.add(n);
 				}
 			});
+
 			try {
 				innerRing.sortBy(sortBy);
 			} catch(error : Error) {

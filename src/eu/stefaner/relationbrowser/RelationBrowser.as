@@ -46,7 +46,7 @@
 		public var showInterConnections : Boolean = false;
 		public var lastClickedNode : Node;
 		private var _layoutMode : int;
-		public var nodeLabeler : *;
+		public var nodeLabeler : NodeLabeler;
 
 		/**		 *@Constructor		 */
 		public function RelationBrowser() {

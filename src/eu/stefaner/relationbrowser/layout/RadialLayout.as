@@ -47,10 +47,10 @@
 			}
 			// TODO: express as fraction of layoutBounds.width
 			var innerRadius : Number = layoutBounds.width * .33;
-			var angle : Number;
+			var angle : Number = 0;
 			for each (n in innerRing) {
 				_t.$(n).radius = innerRadius + doZigZag * ((counter % 2) * 2 - 1) * innerRadius / 6;
-				angle = angleInc * counter--;
+				angle = Math.PI * .5 + angleInc * counter--;
 				_t.$(n).angle = angle;
 				n.parent.addChild(n);
 			}

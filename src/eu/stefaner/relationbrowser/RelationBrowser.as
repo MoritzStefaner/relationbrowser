@@ -46,7 +46,7 @@
 		public var showInterConnections : Boolean = false;
 		public var lastClickedNode : Node;
 		private var _layoutMode : int;
-		public var nodeLabeler : *;
+		public var nodeLabeler : NodeLabeler;
 
 		/**		 *@Constructor		 */
 		public function RelationBrowser() {
@@ -78,8 +78,8 @@
 			tf.align = TextFormatAlign.CENTER;
 			tf.font = "Arial";
 			tf.size = 11;
-			tf.bold = true;
-			tf.color = 0x333333;
+			tf.bold = false;
+			tf.color = 0x444444;
 			var l : NodeLabeler = new NodeLabeler("data.label", tf);
 			return l;
 		}

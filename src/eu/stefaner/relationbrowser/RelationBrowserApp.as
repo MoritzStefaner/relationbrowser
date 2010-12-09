@@ -36,7 +36,7 @@
 			Logger.info("startUp");
 			initStage();
 			initExternalInterface();
-			//initSWFAddress();
+			initSWFAddress();
 			initDisplay();
 			loadData();
 		}
@@ -64,7 +64,7 @@
 			SWFAddress.setValue(id);
 		}
 
-		private function storeSelectionInURL() : void {
+		protected function storeSelectionInURL() : void {
 			if (relationBrowser.selectedNode) {
 				SWFAddress.setValue(relationBrowser.selectedNode.data.id);
 				SWFAddress.setTitle(baseTitle + " : " + relationBrowser.selectedNode.data.label);

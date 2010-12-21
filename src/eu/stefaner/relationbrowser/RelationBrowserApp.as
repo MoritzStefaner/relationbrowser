@@ -202,7 +202,7 @@
 				}
 			} else {
 				try {
-					ExternalInterface.call(string, {});
+					ExternalInterface.call(string);
 					// Logger.info("sendToJS:", string);
 				} catch(e : Error) {
 				}

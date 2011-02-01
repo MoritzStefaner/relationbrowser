@@ -36,7 +36,6 @@
 			Logger.info("startUp");
 			initStage();
 			initExternalInterface();
-			initSWFAddress();
 			initDisplay();
 			loadData();
 		}

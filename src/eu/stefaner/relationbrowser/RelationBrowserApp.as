@@ -1,4 +1,5 @@
 ﻿package eu.stefaner.relationbrowser {
+
 	import eu.stefaner.relationbrowser.layout.RelationBrowserEdgeRenderer;
 	import eu.stefaner.relationbrowser.ui.Node;
 
@@ -22,6 +23,7 @@
 	 * @author mo
 	 */
 	public class RelationBrowserApp extends Sprite {
+
 		public var dataURL : String;
 		public var configURL : String;
 		protected var relationBrowser : RelationBrowser;

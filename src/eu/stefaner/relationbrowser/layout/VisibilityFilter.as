@@ -1,11 +1,14 @@
 ﻿package eu.stefaner.relationbrowser.layout {
 	import eu.stefaner.relationbrowser.RelationBrowser;
+
 	import flare.animate.Transitioner;
+	import flare.query.Expression;
 	import flare.vis.data.DataList;
 	import flare.vis.data.DataSprite;
 	import flare.vis.data.EdgeSprite;
 	import flare.vis.data.NodeSprite;
 	import flare.vis.operator.filter.GraphDistanceFilter;
+
 	import flash.utils.Dictionary;
 
 	/**	 * @author mo	 */
@@ -14,6 +17,7 @@
 		public static const MODE_SHOW_NEIGHBORHOOD : String = "MODE_SHOW_NEIGHBORHOOD";
 		public var visibleNodesGroupName : String;
 		public var mode : String = "MODE_SHOW_ALL";
+		public var filter : *;
 
 		public function VisibilityFilter(visibleNodesGroupName : String, focusNodes : Array = null, distance : int = 1, links : int = 3) {
 			super(focusNodes, distance, links);
@@ -39,7 +43,7 @@
 						fn.visitEdges(function(e : EdgeSprite) : void {
 							depths[e] = 1;
 							q.push(e);
-						}, links);
+						}, links, filter);
 					}
 					// perform breadth-first traversal
 					var xe : EdgeSprite, xn : NodeSprite, d : int;
@@ -61,14 +65,14 @@
 								if (depths[e.target] == d && depths[e.source] == d) {
 									depths[e] = d + 1;
 								}
-							}, links);
+							}, links, filter);
 						} else {
 							xn.visitEdges(function(e : EdgeSprite) : void {
 								if (depths[e] == undefined) {
 									depths[e] = d + 1;
 									q.push(e);
 								}
-							}, links);
+							}, links, filter);
 						}
 					}
 					// now set visibility based on traversal results

@@ -18,7 +18,8 @@
 			autoAnchor();
 			var selectedNode : Node = (layoutRoot as Node);
 
-			var r : Number = .5 * Math.max(visualization.bounds.width, visualization.bounds.height);
+			var r : Number = .5 * Math.max(layoutBounds.width, layoutBounds.height);
+			visualization.data.nodes.setProperties({origin:_anchor});
 			visualization.data.nodes.setProperties({radius:r}, _t);
 			_t.$(selectedNode).radius = .001;
 
@@ -31,6 +32,7 @@
 					innerRing.add(n);
 				}
 			});
+
 			try {
 				innerRing.sortBy(sortBy);
 			} catch(error : Error) {
@@ -45,10 +47,10 @@
 			}
 			// TODO: express as fraction of layoutBounds.width
 			var innerRadius : Number = layoutBounds.width * .33;
-			var angle : Number;
+			var angle : Number = 0;
 			for each (n in innerRing) {
 				_t.$(n).radius = innerRadius + doZigZag * ((counter % 2) * 2 - 1) * innerRadius / 6;
-				angle = angleInc * counter--;
+				angle = Math.PI * .5 + angleInc * counter--;
 				_t.$(n).angle = angle;
 				n.parent.addChild(n);
 			}

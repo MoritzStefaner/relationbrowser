@@ -39,7 +39,7 @@
 		public var detailLayout : Layout;
 		public var overviewLayout : Layout;
 		public var visibilityOperator : VisibilityFilter;
-		protected var transitioner : Transitioner = new Transitioner(1);
+		public var transitioner : Transitioner = new Transitioner(1);
 		protected var nodesByID : Dictionary = new Dictionary();
 		protected var visibleNodes : DataList;
 		protected var visibleEdges : DataList;
@@ -78,8 +78,8 @@
 			tf.align = TextFormatAlign.CENTER;
 			tf.font = "Arial";
 			tf.size = 11;
-			tf.bold = true;
-			tf.color = 0x333333;
+			tf.bold = false;
+			tf.color = 0x444444;
 			var l : NodeLabeler = new NodeLabeler("data.label", tf);
 			return l;
 		}
@@ -242,6 +242,8 @@
 				// no node yet for ID: create node
 				n = nodesByID[o.id] = createNode(o);
 				data.nodes.applyDefaults(n);
+				n.origin = (detailLayout as RadialLayout).layoutAnchor;
+				n.radius = .001;
 				data.addNode(n);
 			} else {
 				// existing node: set new data

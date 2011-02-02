@@ -137,7 +137,7 @@
 		}
 
 		protected function initLabelSprite() : void {
-			_labelSprite.maxWidth = 100;
+			_labelSprite.maxWidth = 80;
 			_labelSprite.textFormat.align = TextFormatAlign.CENTER;
 
 			_labelSprite.backgroundFill = true;

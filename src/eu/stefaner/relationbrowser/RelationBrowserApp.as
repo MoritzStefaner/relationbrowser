@@ -1,4 +1,5 @@
 ﻿package eu.stefaner.relationbrowser {
+
 	import eu.stefaner.relationbrowser.layout.RelationBrowserEdgeRenderer;
 	import eu.stefaner.relationbrowser.ui.Node;
 
@@ -22,6 +23,7 @@
 	 * @author mo
 	 */
 	public class RelationBrowserApp extends Sprite {
+
 		public var dataURL : String;
 		public var configURL : String;
 		protected var relationBrowser : RelationBrowser;
@@ -41,38 +43,39 @@
 			loadData();
 		}
 
-		protected function initSWFAddress() : void {
-			SWFAddress.addEventListener(SWFAddressEvent.EXTERNAL_CHANGE, onURLparamChanged);
-			SWFAddress.addEventListener(SWFAddressEvent.INIT, onURLparamChanged);
-			baseTitle = SWFAddress.getTitle();
-		}
+		protected function initDisplay() : void {
+			Logger.info("RelationBrowserApp: initDisplay");
+			relationBrowser = createRelationBrowser();
 
-		protected function onURLparamChanged(event : SWFAddressEvent = null) : void {
-			Logger.info("urlparam changed", getIDFromURL());
-			selectNodeByID(getIDFromURL());
-		}
+			relationBrowser.addOperators(getOperators());
 
-		protected function getIDFromURL() : String {
-			try {
-				return SWFAddress.getValue().split("/")[1];
-			} catch (error : Error) {
+			relationBrowser.nodeDefaults = getNodeDefaults();
+			relationBrowser.edgeDefaults = getEdgeDefaults();
+
+			// relationBrowser.sortBy = ["props.cluster"];
+			addChild(relationBrowser);
+			onResize();
+
+			relationBrowser.addEventListener(RelationBrowser.NODE_CLICKED, onNodeClicked);
+			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTED, onNodeSelected);
+			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTION_FINISHED, onNodeSelectionFinished);
+		};
+
+		// call when everything is set up, to get startID from Javascript
+		protected function onDataAndDisplayReady() : void {
+			if (ExternalInterface.available) {
+				try {
+					ExternalInterface.call("onFlashReady");
+				} catch(e : Error) {
+				}
 			}
-			return null;
-		}
+			relationBrowser.visible = true;
+			// addChild(relationBrowser);
+			relationBrowser.nodeDefaults = getNodeDefaults();
+			relationBrowser.edgeDefaults = getEdgeDefaults();
+			initSWFAddress();
+		};
 
-		protected function setIDInURL(id : String = "") : void {
-			SWFAddress.setValue(id);
-		}
-
-		protected function storeSelectionInURL() : void {
-			if (relationBrowser.selectedNode) {
-				SWFAddress.setValue(relationBrowser.selectedNode.data.id);
-				SWFAddress.setTitle(baseTitle + " : " + relationBrowser.selectedNode.data.label);
-			} else {
-				SWFAddress.setValue("");
-				SWFAddress.setTitle(baseTitle);
-			}
-		}
 
 		protected function initStage() : void {
 			stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -90,14 +93,12 @@
 			relationBrowser.y = 0;
 		};
 
-		protected function initExternalInterface() : void {
-			if (ExternalInterface.available) {
-				try {
-					ExternalInterface.addCallback("selectNodeByID", selectNodeByID);
-				} catch(e : Error) {
-				}
-			}
+
+
+		protected function loadData() : void {
+			Logger.info("loadData");
 		};
+
 
 		// for external JS calls
 		public function selectNodeByID(id : String = null) : void {
@@ -108,50 +109,10 @@
 			}
 		};
 
-		// call when everything is set up, to get startID from Javascript
-		protected function onDataAndDisplayReady() : void {
-			if (ExternalInterface.available) {
-				try {
-					ExternalInterface.call("onFlashReady");
-				} catch(e : Error) {
-				}
-			}
-			relationBrowser.visible = true;
-			//addChild(relationBrowser);
-			relationBrowser.nodeDefaults = getNodeDefaults();
-			relationBrowser.edgeDefaults = getEdgeDefaults();
-			initSWFAddress();
-		};
 
-		protected function loadData() : void {
-			Logger.info("loadData");
-		};
-
-		protected function loadCSV(nodesFileURL : String, relationsFileURL : String) : void {
-			Logger.info("loadCSV");
-		};
-
-		protected function loadGraphML(graphmlFileURL : String) : void {
-			Logger.info("loadGraphML");
-		};
-
-		protected function initDisplay() : void {
-			Logger.info("RelationBrowserApp: initDisplay");
-			relationBrowser = createRelationBrowser();
-			
-			relationBrowser.addOperators(getOperators());
-			
-			relationBrowser.nodeDefaults = getNodeDefaults();
-			relationBrowser.edgeDefaults = getEdgeDefaults();
-			
-			//relationBrowser.sortBy = ["props.cluster"];
-			addChild(relationBrowser);
-			onResize();
-
-			relationBrowser.addEventListener(RelationBrowser.NODE_CLICKED, onNodeClicked);
-			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTED, onNodeSelected);
-			relationBrowser.addEventListener(RelationBrowser.NODE_SELECTION_FINISHED, onNodeSelectionFinished);
-		};
+		protected function createRelationBrowser() : RelationBrowser {
+			return new RelationBrowser();
+		}
 
 		protected function getNodeDefaults() : Object {
 			var n : Object = {};
@@ -193,6 +154,18 @@
 			sendToJS("onNodeSelectionFinished", relationBrowser.selectedNode);
 		}
 
+
+
+		protected function initExternalInterface() : void {
+			if (ExternalInterface.available) {
+				try {
+					ExternalInterface.addCallback("selectNodeByID", selectNodeByID);
+				} catch(e : Error) {
+				}
+			}
+		};
+
+
 		protected function sendToJS(string : String, node : Node = null) : void {
 			if (node && node.data) {
 				try {
@@ -209,8 +182,38 @@
 			}
 		}
 
-		protected function createRelationBrowser() : RelationBrowser {
-			return new RelationBrowser();
+		protected function initSWFAddress() : void {
+			SWFAddress.addEventListener(SWFAddressEvent.EXTERNAL_CHANGE, onURLparamChanged);
+			SWFAddress.addEventListener(SWFAddressEvent.INIT, onURLparamChanged);
+			baseTitle = SWFAddress.getTitle();
 		}
+
+		protected function onURLparamChanged(event : SWFAddressEvent = null) : void {
+			Logger.info("urlparam changed", getIDFromURL());
+			selectNodeByID(getIDFromURL());
+		}
+
+		protected function getIDFromURL() : String {
+			try {
+				return SWFAddress.getValue().split("/")[1];
+			} catch (error : Error) {
+			}
+			return null;
+		}
+
+		protected function setIDInURL(id : String = "") : void {
+			SWFAddress.setValue(id);
+		}
+
+		protected function storeSelectionInURL() : void {
+			if (relationBrowser.selectedNode) {
+				SWFAddress.setValue(relationBrowser.selectedNode.data.id);
+				SWFAddress.setTitle(baseTitle + " : " + relationBrowser.selectedNode.data.label);
+			} else {
+				SWFAddress.setValue("");
+				SWFAddress.setTitle(baseTitle);
+			}
+		}
+
 	}
 }

@@ -1,0 +1,17 @@
+
+This is the open source version of Moritz Stefaner's "Relation Browser":http://moritz.stefaner.eu/projects/relation-browser/. 
+
+h2. License
+
+The sources are available under an "Apache 2.0 license":http://www.apache.org/licenses/LICENSE-2.0.html
+
+h2. Frameworks and libraries
+
+The distribution requires the following open source libraries (please respect the respective licenses): 
+* "flare":http://flare.prefuse.org : Please use my fork at https://github.com/MoritzStefaner/flare
+
+
+h2. FAQ
+
+__The demos do not seem to work?__
+Do you have Flash Player 10 installed? Also, make sure to allow local access to the data files with the "Security Settings Manager":http://macromedia.com/support/documentation/en/flashplayer/help/settings_manager04.html
